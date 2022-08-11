@@ -1,22 +1,22 @@
-# DependencyStats
+# Jungle
 
 A command line tool to extract dependency graph statistics from a CocoaPods-based Xcode project.
 
 ## Installation
 
-### [Mint](https://github.com/xing/DependencyStats) (recommended)
+### [Mint](https://github.com/xing/jungle) (recommended)
 
 ```bash
-mint install xing/DependencyStats
-mint run DependencyStats help
+mint install xing/jungle
+mint run jungle@main help
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/xing/DependencyStats
+git clone https://github.com/xing/jungle
 swift build -c release
-.build/release/DependencyStats help
+.build/release/jungle help
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ swift build -c release
 ```shell
 OVERVIEW: Displays historic complexity of the dependency graph
 
-USAGE: DependencyStats history [--since <since>] [--pod <pod>] [--output-format <output-format>] [<directory-path>]
+USAGE: jungle history [--since <since>] [--pod <pod>] [--output-format <output-format>] [<directory-path>]
 
 ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock is located (default: .)
@@ -55,7 +55,7 @@ Outputs Comma Separated Values by default (JSON option available):
 ```shell
 OVERVIEW: Compares the current complexity of the dependency graph to others versions in git
 
-USAGE: DependencyStats compare [--to <git-object> ...] [--pod <pod>] [<directory-path>]
+USAGE: jungle compare [--to <git-object> ...] [--pod <pod>] [<directory-path>]
 
 ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock is located (default: .)
@@ -74,7 +74,7 @@ Outputs JSON formatted string
 ```shell
 OVERVIEW: Outputs the dependency graph in DOT format
 
-USAGE: DependencyStats graph [--of <git-object>] [--pod <pod>] [<directory-path>]
+USAGE: jungle graph [--of <git-object>] [--pod <pod>] [<directory-path>]
 
 ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock is located (default: .)
@@ -94,8 +94,8 @@ Outputs DOT format which can be viewed using http://viz-js.com
 💡 Copy CSV (to paste in a spreadsheet) or DOT (to paste at http://viz-js.com) to the clipboard using `pbcopy`
 
 ```shell
-DependencyStats graph | pbcopy
-DependencyStats history | pbcopy
+jungle graph | pbcopy
+jungle history | pbcopy
 ``` 
 
 
@@ -103,6 +103,7 @@ DependencyStats history | pbcopy
 
 ```shell
 brew install graphviz
-DependencyStats graph | dot -Tpng -o graph.png && open graph.png
+jungle graph | dot -Tpng -o graph.png && open graph.png
+jungle graph | dot -Tpng -o graph.png && open graph.png
 ```
  

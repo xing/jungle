@@ -4,10 +4,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "DependencyStats",
+    name: "jungle",
     platforms: [.macOS(.v12)],
     products: [
-        .executable(name: "DependencyStats", targets: ["DependencyStats"]),
+        .executable(name: "jungle", targets: ["jungle"]),
         .library(name: "PodExtractor", targets: ["PodExtractor"]),
         .library(name: "DependencyGraph", targets: ["DependencyGraph"]),
     ],
@@ -19,7 +19,7 @@ let package = Package(
         
         // Executable
         .executableTarget(
-            name: "DependencyStats",
+            name: "jungle",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .target(name: "PodExtractor"),
@@ -27,8 +27,8 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "DependencyStatsTests",
-            dependencies: ["DependencyStats"]
+            name: "jungleTests",
+            dependencies: ["jungle"]
         ),
         
         // PodExtractor

@@ -1,5 +1,5 @@
 import XCTest
-@testable import DependencyStats
+@testable import jungle
 
 final class GitLogEntryTests: XCTestCase {
     func testParseYieldsGitLogEntry() throws {
