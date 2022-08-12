@@ -1,6 +1,9 @@
 # Jungle
 
-A command line tool to extract dependency graph statistics from a CocoaPods-based Xcode project.
+A Swift command line tool to extract dependency graph statistics from a CocoaPods-based Xcode project.
+
+You can read more information about dependency complexity in our Technical article ["How to control your dependencies"](https://medium.com/@OswaldoRubio/how-to-control-your-dependencies-7690cc7b1c40).
+
 
 ## Installation
 
@@ -8,7 +11,7 @@ A command line tool to extract dependency graph statistics from a CocoaPods-base
 
 ```bash
 mint install xing/jungle
-mint run jungle@main help
+mint run jungle help
 ```
 
 ### Manual
@@ -103,7 +106,6 @@ jungle history | pbcopy
 
 ```shell
 brew install graphviz
-jungle graph | dot -Tpng -o graph.png && open graph.png
 jungle graph | dot -Tpng -o graph.png && open graph.png
 ```
  
