@@ -1,11 +1,13 @@
 import ArgumentParser
 
-@main struct DependencyStats: AsyncParsableCommand {
+@main struct Jungle: AsyncParsableCommand {
     static var configuration = CommandConfiguration(
-        commandName: "DependencyStats",
+        commandName: "jungle",
         abstract: "Displays dependency statistics",
         version: "1.0.0",
         subcommands: [HistoryCommand.self, CompareCommand.self, GraphCommand.self],
         defaultSubcommand: CompareCommand.self
     )
+    
+    func run() throws { }
 }
