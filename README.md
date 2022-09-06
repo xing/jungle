@@ -20,6 +20,7 @@ mint run jungle help
 
 ```bash
 git clone https://github.com/xing/jungle
+cd jungle
 swift build -c release
 .build/release/jungle help
 ```
@@ -46,13 +47,14 @@ OPTIONS:
 ```
 
 
-Outputs Comma Separated Values by default (JSON option available):
+Example:
+
 ```shell
-<timestamp>;<hash>;<nodeCount>;<complexity>;<author>;<message>
-<timestamp>;<hash>;<nodeCount>;<complexity>;<author>;<message>
-<timestamp>;<hash>;<nodeCount>;<complexity>;<author>;<message>
-.
-.
+jungle history ProjectDirectory/ --since '1 week ago'
+
+2022-08-30T15:12:14+02:00;cdb9d2ce64a;124;21063;Author;commit message
+2022-09-02T11:02:12+02:00;4fdf3a157a4;124;21063;Author;commit message
+Now;Current;124;21063;;
 ```
 
 ### Compare Complexity Graphs
@@ -72,7 +74,26 @@ OPTIONS:
   -h, --help              Show help information.
 ```
 
-Outputs JSON formatted string
+Example:
+
+```shell
+
+jungle compare ProjectDirectory/ --to main
+[
+  {
+    "modules" : 124,
+    "complexity" : 20063,
+    "name" : "Current",
+    "moduleCount" : 124
+  },
+  {
+    "modules" : 124,
+    "complexity" : 21063,
+    "name" : "main",
+    "moduleCount" : 124
+  }
+]
+```
 
 ### Visualize Complexity Graphs
 
@@ -94,7 +115,8 @@ OPTIONS:
 
 Outputs DOT format which can be viewed using http://viz-js.com
 
----
+
+#### Some tips
 
 💡 Copy CSV (to paste in a spreadsheet) or DOT (to paste at http://viz-js.com) to the clipboard using `pbcopy`
 
@@ -111,3 +133,17 @@ brew install graphviz
 jungle graph | dot -Tpng -o graph.png && open graph.png
 ```
  
+## Contributing
+
+🎁 Bug reports and pull requests for new features/ideas are most welcome!
+
+👷🏼 We are looking forward to your pull request, we'd love to help!
+
+You can help by doing any of the following:
+
+- Reviewing pull requests
+- Bringing ideas for new features
+- Answering questions on issues
+- Improving documentation
+
+This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant code](http://contributor-covenant.org/) of conduct.
