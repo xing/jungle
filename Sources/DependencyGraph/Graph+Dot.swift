@@ -1,6 +1,6 @@
 import Foundation
 
-public extension Graph {
+public extension Graph
     
     var multiEdgeDOT: String {
         let edges = multiEdges
