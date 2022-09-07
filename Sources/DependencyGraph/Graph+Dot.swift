@@ -1,7 +1,7 @@
 import Foundation
 
 public extension Graph {
-    
+
     var multiEdgeDOT: String {
         let edges = multiEdges
             .map { "\t \"\($0.source)\" -> \"\($0.target)\"" }
