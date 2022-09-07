@@ -163,3 +163,4 @@ You generally only need to submit a CLA once, so if you've already submitted one
 again.
 
 [XING CLA]: docs/XING_CLAv2.md
+[contributors]: https://github.com/xing/jungle/graphs/contributors
