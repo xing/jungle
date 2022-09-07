@@ -21,4 +21,4 @@ jobs:
           path-to-signatures: 'signatures/version1/cla.json'
           path-to-document: 'https://github.com/xing/jungle/blob/main/docs/XING_CLAv2.md'
           branch: 'main'
-          allowlist: osrufung, bot*
+          allowlist: osrufung,bot*
