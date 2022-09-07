@@ -19,7 +19,6 @@ jobs:
           PERSONAL_ACCESS_TOKEN : ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: 'signatures/version1/cla.json'
-          path-to-document: 'https://github.com/xing/jungle/docs/CLA.md'
-          # branch should not be protected
+          path-to-document: 'https://github.com/xing/jungle/blob/main/docs/XING_CLAv2.md'
           branch: 'main'
-          allowlist: user1,bot*
+          allowlist: bot*
