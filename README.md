@@ -146,4 +146,20 @@ You can help by doing any of the following:
 - Answering questions on issues
 - Improving documentation
 
+
 This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant code](http://contributor-covenant.org/) of conduct.
+
+### Contributor License Agreement
+
+Contributions to this project must be accompanied by a Contributor License
+Agreement. You (or your employer) retain the copyright to your contribution,
+this simply gives us permission to use and redistribute your contributions as
+part of the project. Find the agreement [here][XING CLA] and head over to [the
+contributors page][contributors] and find a XING employee to contact for further
+instructions.
+
+You generally only need to submit a CLA once, so if you've already submitted one
+(even if it was for a different project), you probably don't need to do it
+again.
+
+[XING CLA]: docs/XING_CLAv2.md
