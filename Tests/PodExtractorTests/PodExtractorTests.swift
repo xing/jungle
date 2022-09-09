@@ -193,7 +193,7 @@ final class PodExtractorTests: XCTestCase {
         
         let targets = try extractTargetsFromPodfile(podfile)
         
-        XCTAssertEqual(targets.count, 1)
+        XCTAssertEqual(targets.count, 2)
         XCTAssertEqual(targets.first?.dependencies.count, 28)
     }
 }
