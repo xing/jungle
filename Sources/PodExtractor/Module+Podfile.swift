@@ -4,46 +4,9 @@ import DependencyModule
 public enum PodError: Error {
     case yamlParsingFailed
     case missingPodsDictionary
-    case missingTargetDefinition
-    case missingTargetName
     case missingSpecReposDictionary
     case failedParsingPod
     case failedParsingPodName
-}
- 
-public func extractDependencies(for target: String, _ contents: String) throws -> [String] {
-    // parse YAML to JSON
-    guard let yaml = try? Yams.load(yaml: contents) as? [String: Any] else {
-        throw PodError.yamlParsingFailed
-    }
-
-    guard let target_definitions = yaml["target_definitions"] as? [[String: Any]],
-          let children = target_definitions.first?["children"] as? [[String: Any]]
-    else {
-        throw PodError.missingTargetDefinition
-    }
-
-    // Find the children with same target name
-    let filtered = children.filter { $0["name"] as? String == target }
-
-    // get the plain list of dependencies for that target
-    guard let target = filtered.first,
-          let rawPods = target["dependencies"] as? [Any]
-    else { throw PodError.missingTargetName }
-    
-    return try rawPods.map(extractPodNameFromJSON)
-}
-
-private func extractPodNameFromJSON(_ json: Any) throws -> String {
-    if let name = json as? String {
-        return name
-
-    } else if let container = json as? [String: [Any]],
-              let name = container.keys.first {
-        return name
-    } else {
-        throw PodError.failedParsingPod
-    }
 }
 
 public func extractModulesFromPodfile(_ contents: String) throws -> [Module] {
