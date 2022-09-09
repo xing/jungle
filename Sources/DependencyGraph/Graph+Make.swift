@@ -1,5 +1,4 @@
 import Foundation
-import PodExtractor
 import DependencyModule
 
 public enum GraphError: Error {
@@ -7,10 +6,10 @@ public enum GraphError: Error {
 }
 
 public extension Graph {
-    static func makeForVirtualAppModule(name: String, dependencies: [Module], targetDependencies: Target?) throws -> Graph {
+    static func makeForVirtualAppModule(name: String, dependencies: [Module], targetDependencies: [String]?) throws -> Graph {
         
         let dependencies = dependencies
-            .filter { targetDependencies?.dependencies.contains($0.name) ?? true }
+            .filter { targetDependencies?.contains($0.name) ?? true }
  
         let appModule = Module(name: name, dependencies: dependencies.map(\.name))
 

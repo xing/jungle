@@ -71,7 +71,7 @@ func process(label: String, pod: String?, podfile: String, target: Target) throw
     if let pod = pod {
         graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
     } else {
-        graph = try Graph.makeForVirtualAppModule(name: target.name, dependencies: dependencies, targetDependencies: target)
+        graph = try Graph.makeForVirtualAppModule(name: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
     }
         
     return CompareStatsOutput(label: label, graph: graph)
