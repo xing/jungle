@@ -6,11 +6,11 @@ func shell(_ command: String, at currentDirectoryURL: URL) throws -> String {
 
     task.standardOutput = pipe
     task.standardError = pipe
-    task.arguments = ["-c", command]
+    task.arguments = ["--login", "-c", command]
     task.launchPath = "/bin/zsh"
     task.standardInput = nil
     task.currentDirectoryURL = currentDirectoryURL
-
+    
     try task.run()
     
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
