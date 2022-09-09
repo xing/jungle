@@ -3,6 +3,10 @@ import Foundation
 import DependencyGraph
 import PodExtractor
 
+public enum CompareError: Error {
+    case targetNotFound
+}
+
 struct CompareCommand: ParsableCommand {
     static var configuration = CommandConfiguration(
         commandName: "compare",
@@ -18,6 +22,9 @@ struct CompareCommand: ParsableCommand {
 
     @Option(help: "The Pod to compare. Omitting this generates compares a virtual `App` target that imports all Pods")
     var pod: String?
+    
+    @Option(help: "The target to be used. Omitting this will take the first target as default")
+    var target: String
 
     @Argument(help: "Path to the directory where Podfile.lock is located")
     var directoryPath: String = "."
@@ -26,17 +33,26 @@ struct CompareCommand: ParsableCommand {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
 
+        // Choose the target to analyze
+        let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
+        let allTargets = try extractTargetsFromPodfile(podfileJSON)
+        guard let targetWithDependencies = allTargets.filter({ $0.name == target }).first else {
+            throw CompareError.targetNotFound
+        }
+
         let current = try process(
             label: "Current",
             pod: pod,
-            podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock"))
+            podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock")),
+            target: targetWithDependencies
         )
 
         let outputs = [current] + gitObjects.compactMap {
             try? process(
                 label: $0,
                 pod: pod,
-                podfile: shell("git show \($0):Podfile.lock", at: directoryURL)
+                podfile: shell("git show \($0):Podfile.lock", at: directoryURL),
+                target: targetWithDependencies
             )
         }
         
@@ -48,14 +64,14 @@ struct CompareCommand: ParsableCommand {
     }
 }
 
-func process(label: String, pod: String?, podfile: String) throws -> CompareStatsOutput {
+func process(label: String, pod: String?, podfile: String, target: Target) throws -> CompareStatsOutput {
     let dependencies = try extractModulesFromPodfile(podfile)
     
     let graph: Graph
     if let pod = pod {
         graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
     } else {
-        graph = try Graph.makeForVirtualAppModule(name: "App", dependencies: dependencies)
+        graph = try Graph.makeForVirtualAppModule(name: target.name, dependencies: dependencies, targetDependencies: target)
     }
         
     return CompareStatsOutput(label: label, graph: graph)

@@ -36,7 +36,7 @@ final class DependencyGraphTests: XCTestCase {
         let b = Module(name: "B", dependencies: ["B1", "B2", "C"])
         let c = Module(name: "C", dependencies: ["C1", "C2"])
 
-        let graph = try Graph.makeForVirtualAppModule(name: "Top", dependencies: [a, b, c])
+        let graph = try Graph.makeForVirtualAppModule(name: "Top", dependencies: [a, b, c], targetDependencies: nil)
         XCTAssertEqual(graph.multiEdges.count, 15)
         XCTAssertEqual(graph.uniqueEdges.count, 11)
         XCTAssertEqual(graph.nodes.count, 10)

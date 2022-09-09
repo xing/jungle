@@ -12,12 +12,12 @@ public enum PodError: Error {
 }
 
 public struct Target: Decodable {
-    let name: String
-    let dependencies: [String]
+    public let name: String
+    public let dependencies: [String]
 }
 
 struct Podfile: Decodable {
-    let sources: [String]
+    let sources: [String]?
     let targetDefinitions: [TargetDefinition]
     
     struct TargetDefinition: Decodable {
@@ -29,9 +29,22 @@ struct Podfile: Decodable {
     struct ChildrenDefinition: Decodable {
         let name: String
         let dependencies: [Dependency]
+        let children: [ChildrenDefinition]?
+        var asTarget: [Target] {
+            let target = Target(name: name, dependencies: dependencies.compactMap(\.name))
+            var result: [Target] = []
+            if let children = children {
+                let subtargets = children.map(\.asTarget)
+                for subtarget in subtargets {
+                    result = result + subtarget
+                }
+            }
+            return [target] + result
+        }
+        
         struct Dependency: Decodable {
             let name: String?
-            
+
             init(from decoder: Decoder) throws {
                 let container = try decoder.singleValueContainer()
                 if let name = try? container.decode(String.self) {
@@ -64,7 +77,8 @@ public func extractTargetsFromPodfile(_ contents: String) throws -> [Target] {
     else {
         throw PodError.podTargetNotFound
     }
-    return targetsRaw.map { Target(name: $0.name, dependencies: $0.dependencies.compactMap(\.name)) }
+    
+    return targetsRaw.flatMap(\.asTarget)
 }
 
 public func extractModulesFromPodfile(_ contents: String) throws -> [Module] {
