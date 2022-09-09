@@ -1,5 +1,6 @@
 import Yams
 import DependencyModule
+import Foundation
 
 public enum PodError: Error {
     case yamlParsingFailed
@@ -7,6 +8,63 @@ public enum PodError: Error {
     case missingSpecReposDictionary
     case failedParsingPod
     case failedParsingPodName
+    case podTargetNotFound
+}
+
+public struct Target: Decodable {
+    let name: String
+    let dependencies: [String]
+}
+
+struct Podfile: Decodable {
+    let sources: [String]
+    let targetDefinitions: [TargetDefinition]
+    
+    struct TargetDefinition: Decodable {
+        let abstract: Bool
+        let name: String
+        let children: [ChildrenDefinition]
+    }
+    
+    struct ChildrenDefinition: Decodable {
+        let name: String
+        let dependencies: [Dependency]
+        struct Dependency: Decodable {
+            let name: String?
+            
+            init(from decoder: Decoder) throws {
+                let container = try decoder.singleValueContainer()
+                if let name = try? container.decode(String.self) {
+                    self.name = name
+                } else if let keyName = try? container.decode([String: [String]].self).keys.first {
+                    self.name = keyName
+                    
+                } else if let keyName = try? container.decode([String: [[String: String]]].self).keys.first {
+                    self.name = keyName
+                } else {
+                    self.name = nil
+                }
+            }
+       
+        }
+    }
+}
+
+public func extractTargetsFromPodfile(_ contents: String) throws -> [Target] {
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+    
+    guard let data = contents.data(using: .utf8),
+            let pod = try? decoder.decode(Podfile.self, from: data)
+    else {
+        throw PodError.failedParsingPod
+    }
+    //first target is always Pods
+    guard let targetsRaw = pod.targetDefinitions.first?.children
+    else {
+        throw PodError.podTargetNotFound
+    }
+    return targetsRaw.map { Target(name: $0.name, dependencies: $0.dependencies.compactMap(\.name)) }
 }
 
 public func extractModulesFromPodfile(_ contents: String) throws -> [Module] {

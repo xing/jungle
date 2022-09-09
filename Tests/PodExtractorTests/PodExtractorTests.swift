@@ -79,4 +79,121 @@ final class PodExtractorTests: XCTestCase {
 
         XCTAssertEqual(modules.count, 2)
     }
+    
+    func testTargetModulesFromPodfile() throws {
+        let podfile = """
+        {
+           "sources" : [
+              "https://github.com/artsy/Specs.git",
+              "https://cdn.cocoapods.org/"
+           ],
+           "target_definitions" : [
+              {
+                 "abstract" : true,
+                 "children" : [
+                    {
+                       "children" : [
+                          {
+                             "abstract" : false,
+                             "dependencies" : [
+                                "FBSnapshotTestCase",
+                                "Nimble-Snapshots",
+                                "Quick",
+                                "Nimble",
+                                "RxNimble",
+                                "Forgeries",
+                                "RxBlocking"
+                             ],
+                             "inheritance" : "search_paths",
+                             "name" : "KioskTests"
+                          }
+                       ],
+                       "dependencies" : [
+                          "Artsy+UIColors",
+                          "Artsy+UILabels",
+                          "Artsy-UIButtons",
+                          "Artsy+OSSUIFonts",
+                          {
+                             "FLKAutoLayout" : [
+                                "0.1.1"
+                             ]
+                          },
+                          {
+                             "ARCollectionViewMasonryLayout" : [
+                                "~> 2.0.0"
+                             ]
+                          },
+                          {
+                             "SDWebImage" : [
+                                "~> 3.7"
+                             ]
+                          },
+                          "SVProgressHUD",
+                          {
+                             "HockeySDK-Source" : [
+                                {
+                                   "git" : "https://github.com/bitstadium/HockeySDK-iOS.git"
+                                }
+                             ]
+                          },
+                          "ARAnalytics/Segmentio",
+                          "ARAnalytics/HockeyApp",
+                          "CardFlight-v4",
+                          {
+                             "Stripe" : [
+                                "14.0.1"
+                             ]
+                          },
+                          "ECPhoneNumberFormatter",
+                          {
+                             "UIImageViewAligned" : [
+                                {
+                                   "git" : "https://github.com/ashfurrow/UIImageViewAligned.git"
+                                }
+                             ]
+                          },
+                          {
+                             "DZNWebViewController" : [
+                                {
+                                   "git" : "https://github.com/orta/DZNWebViewController.git"
+                                }
+                             ]
+                          },
+                          "ReachabilitySwift",
+                          "UIView+BooleanAnimations",
+                          "ARTiledImageView",
+                          "XNGMarkdownParser",
+                          "ISO8601DateFormatter",
+                          "SwiftyJSON",
+                          "RxSwift",
+                          "RxCocoa",
+                          "RxOptional",
+                          "Moya/RxSwift",
+                          "NSObject+Rx",
+                          "Action"
+                       ],
+                       "name" : "Kiosk"
+                    }
+                 ],
+                 "inhibit_warnings" : {
+                    "all" : true
+                 },
+                 "name" : "Pods",
+                 "platform" : {
+                    "ios" : "10.0"
+                 },
+                 "uses_frameworks" : {
+                    "linkage" : "dynamic",
+                    "packaging" : "framework"
+                 }
+              }
+           ]
+        }
+        """
+        
+        let targets = try extractTargetsFromPodfile(podfile)
+        
+        XCTAssertEqual(targets.count, 1)
+        XCTAssertEqual(targets.first?.dependencies.count, 28)
+    }
 }
