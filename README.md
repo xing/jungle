@@ -2,7 +2,7 @@
 
 [![Swift](https://github.com/xing/jungle/actions/workflows/swift.yml/badge.svg)](https://github.com/xing/jungle/actions/workflows/swift.yml)
 
-A Swift command line tool to extract dependency graph statistics from a CocoaPods-based Xcode project.
+A Swift command line tool to extract dependency information from a CocoaPods-based Xcode project. Dependency graph, complexity, compare stats between branche...
 
 You can read more information about dependency complexity in our Technical article ["How to control your dependencies"](https://medium.com/@OswaldoRubio/how-to-control-your-dependencies-7690cc7b1c40).
 
