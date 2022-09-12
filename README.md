@@ -2,14 +2,30 @@
 
 [![Swift](https://github.com/xing/jungle/actions/workflows/swift.yml/badge.svg)](https://github.com/xing/jungle/actions/workflows/swift.yml)
 
-A Swift command line tool to extract dependency information from a CocoaPods-based Xcode project. Dependency graph, complexity, compare stats between branche...
+A Swift command line tool to extract dependency information from a CocoaPods-based Xcode project. Currently, that´s what you can do:
+- Dependency graph (dot format)
+- Cyclomatic complexity evaluation 
+- Number of dependant modules
+- Compare stats between different branches or even through the git history
 
 You can read more information about dependency complexity in our Technical article ["How to control your dependencies"](https://medium.com/@OswaldoRubio/how-to-control-your-dependencies-7690cc7b1c40).
 
+## Table of contents
+
+- [Installation](#installation)
+  * [Mint](#mint)
+  * [Manual](#manual)
+- [Usage](#usage)
+  * [Fetch Historic Complexities](#fetch-historic-complexities)
+  * [Compare Complexity Graphs](#compare-complexity-graphs)
+  * [Visualize Complexity Graphs](#visualize-complexity-graphs)
+    + [Some tips](#some-tips)
+- [Contributing](#contributing)
+  * [Contributor License Agreement](#contributor-license-agreement)
 
 ## Installation
 
-### [Mint](https://github.com/xing/jungle) (recommended)
+### Mint
 
 ```bash
 mint install xing/jungle
