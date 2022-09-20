@@ -85,7 +85,7 @@ extension GitLogEntry {
         if let pod = pod {
             graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
         } else {
-            graph = try Graph.makeForVirtualAppModule(name: "App", dependencies: dependencies, targetDependencies: nil)
+            graph = try Graph.make(rootTargetName: "App", dependencies: dependencies, targetDependencies: nil)
         }
         
         return HistoryStatsOutput(entry: self, graph: graph)

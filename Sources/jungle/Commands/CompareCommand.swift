@@ -2,9 +2,19 @@ import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
+import DependencyModule
 
 public enum CompareError: Error {
-    case targetNotFound
+    case targetNotFound(target: String)
+}
+
+extension CompareError: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .targetNotFound(let target):
+            return "\"\(target)\" target not found!. Please, provide an existent target in your Podfile."
+        }
+    }
 }
 
 struct CompareCommand: ParsableCommand {
@@ -23,7 +33,7 @@ struct CompareCommand: ParsableCommand {
     @Option(help: "The Pod to compare. Omitting this generates compares a virtual `App` target that imports all Pods")
     var pod: String?
     
-    @Option(help: "The target to be used. Omitting this will take the first target as default")
+    @Option(help: "The target to be used")
     var target: String
 
     @Argument(help: "Path to the directory where Podfile.lock is located")
@@ -35,9 +45,9 @@ struct CompareCommand: ParsableCommand {
 
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
-        let allTargets = try extractTargetsFromPodfile(podfileJSON)
-        guard let targetWithDependencies = allTargets.filter({ $0.name == target }).first else {
-            throw CompareError.targetNotFound
+        let allTargets = try extractModulesFromPodfileLock(podfileJSON)
+        guard let targetWithDependencies = allTargets.first(where: { $0.name == target }) else {
+            throw CompareError.targetNotFound(target: target)
         }
 
         let current = try process(
@@ -64,14 +74,14 @@ struct CompareCommand: ParsableCommand {
     }
 }
 
-func process(label: String, pod: String?, podfile: String, target: Target) throws -> CompareStatsOutput {
+func process(label: String, pod: String?, podfile: String, target: Module) throws -> CompareStatsOutput {
     let dependencies = try extractModulesFromPodfile(podfile)
     
     let graph: Graph
     if let pod = pod {
         graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
     } else {
-        graph = try Graph.makeForVirtualAppModule(name: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
+        graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
     }
         
     return CompareStatsOutput(label: label, graph: graph)

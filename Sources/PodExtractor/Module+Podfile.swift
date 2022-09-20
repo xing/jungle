@@ -11,10 +11,6 @@ public enum PodError: Error {
     case podTargetNotFound
 }
 
-public struct Target: Decodable {
-    public let name: String
-    public let dependencies: [String]
-}
 
 struct Podfile: Decodable {
     let sources: [String]?
@@ -30,16 +26,10 @@ struct Podfile: Decodable {
         let name: String
         let dependencies: [Dependency]
         let children: [ChildrenDefinition]?
-        var asTarget: [Target] {
-            let target = Target(name: name, dependencies: dependencies.compactMap(\.name))
-            var result: [Target] = []
-            if let children = children {
-                let subtargets = children.map(\.asTarget)
-                for subtarget in subtargets {
-                    result = result + subtarget
-                }
-            }
-            return [target] + result
+        var asTarget: [Module] {
+            let target = Module(name: name, dependencies: dependencies.compactMap(\.name))
+            let children = children ?? []
+            return children.reduce([target]) { $0 + $1.asTarget }
         }
         
         struct Dependency: Decodable {
@@ -63,7 +53,7 @@ struct Podfile: Decodable {
     }
 }
 
-public func extractTargetsFromPodfile(_ contents: String) throws -> [Target] {
+public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module] {
     let decoder = JSONDecoder()
     decoder.keyDecodingStrategy = .convertFromSnakeCase
     

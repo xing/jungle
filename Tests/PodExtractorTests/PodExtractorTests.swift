@@ -191,9 +191,38 @@ final class PodExtractorTests: XCTestCase {
         }
         """
         
-        let targets = try extractTargetsFromPodfile(podfile)
+        let targets = try extractModulesFromPodfileLock(podfile)
         
         XCTAssertEqual(targets.count, 2)
-        XCTAssertEqual(targets.first?.dependencies.count, 28)
+        let expectedDependencies = ["Artsy+UIColors",
+                        "Artsy+UILabels",
+                        "Artsy-UIButtons",
+                        "Artsy+OSSUIFonts",
+                        "FLKAutoLayout",
+                        "ARCollectionViewMasonryLayout",
+                        "SDWebImage",
+                        "SVProgressHUD",
+                        "HockeySDK-Source",
+                        "ARAnalytics/Segmentio",
+                        "ARAnalytics/HockeyApp",
+                        "CardFlight-v4",
+                        "Stripe",
+                        "ECPhoneNumberFormatter",
+                        "UIImageViewAligned",
+                        "DZNWebViewController",
+                        "ReachabilitySwift",
+                        "UIView+BooleanAnimations",
+                        "ARTiledImageView",
+                        "XNGMarkdownParser",
+                        "ISO8601DateFormatter",
+                        "SwiftyJSON",
+                        "RxSwift",
+                        "RxCocoa",
+                        "RxOptional",
+                        "Moya/RxSwift",
+                        "NSObject+Rx",
+                        "Action"]
+        
+        XCTAssertEqual(targets.first?.dependencies, expectedDependencies)
     }
 }
