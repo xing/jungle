@@ -2,6 +2,7 @@ import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
+import DependencyModule
 
 struct GraphCommand: ParsableCommand {
     static var configuration = CommandConfiguration(
@@ -19,7 +20,7 @@ struct GraphCommand: ParsableCommand {
     var pod: String?
 
     @Option(help: "The target in your Podfile file to be used")
-    var target: String    
+    var target: String
     
     @Argument(help: "Path to the directory where Podfile.lock is located")
     var directoryPath: String = "."
@@ -28,31 +29,40 @@ struct GraphCommand: ParsableCommand {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
 
+        // Choose the target to analyze
+        let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
+        let allTargets = try extractModulesFromPodfileLock(podfileJSON)
+        guard let targetWithDependencies = allTargets.first(where: { $0.name == target }) else {
+            throw CompareError.targetNotFound(target: target)
+        }
+        
         if let gitObject = gitObject {
             try print(
                 makeDOT(
                     podfile: shell("git show \(gitObject):Podfile.lock", at: directoryURL),
-                    label: gitObject
+                    label: gitObject,
+                    target: targetWithDependencies
                 )
             )
         } else {
             print(
                 try makeDOT(
                     podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock")),
-                    label: "Current"
+                    label: "Current",
+                    target: targetWithDependencies
                 )
             )
         }
     }
     
-    private func makeDOT(podfile: String, label: String) throws -> String {
+    private func makeDOT(podfile: String, label: String, target: Module) throws -> String {
         let dependencies = try extractModulesFromPodfile(podfile)
         
         let graph: Graph
         if let pod = pod {
             graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
         } else {
-            graph = try Graph.make(rootTargetName: "App", dependencies: dependencies, targetDependencies: nil)
+            graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
         }
         
         return graph.multiEdgeDOT
