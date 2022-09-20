@@ -15,9 +15,12 @@ struct GraphCommand: ParsableCommand {
     )
     var gitObject: String?
 
-    @Option(help: "The Pod to graph. Omitting this generates compares a virtual `App` target that imports all Pods")
+    @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
     var pod: String?
 
+    @Option(help: "The target in your Podfile file to be used")
+    var target: String    
+    
     @Argument(help: "Path to the directory where Podfile.lock is located")
     var directoryPath: String = "."
 

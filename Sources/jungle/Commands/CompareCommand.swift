@@ -30,10 +30,10 @@ struct CompareCommand: ParsableCommand {
     )
     var gitObjects: [String] = ["HEAD", "main", "master"]
 
-    @Option(help: "The Pod to compare. Omitting this generates compares a virtual `App` target that imports all Pods")
+    @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
     var pod: String?
     
-    @Option(help: "The target to be used")
+    @Option(help: "The target in your Podfile file to be used")
     var target: String
 
     @Argument(help: "Path to the directory where Podfile.lock is located")

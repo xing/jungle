@@ -1,4 +1,5 @@
 import XCTest
+import DependencyModule
 @testable import jungle
 
 final class GitLogEntryTests: XCTestCase {
@@ -32,8 +33,10 @@ final class GitLogEntryTests: XCTestCase {
             from: "abbd80e;2022-07-09T21:29:20+02:00;Shammi Didla;restructure \n something"
         )
         
-        let row = try await entry.process(pod: nil, podfile: podfile).csv
-        XCTAssertEqual(row.description, "2022-07-09T21:29:20+02:00;abbd80e;5;1;Shammi Didla;restructure . something")
+        let target: Module = .init(name: "T", dependencies: ["A", "C"])
+        
+        let row = try await entry.process(pod: nil, podfile: podfile, target: target).csv
+        XCTAssertEqual(row.description, "2022-07-09T21:29:20+02:00;abbd80e;4;1;Shammi Didla;restructure . something")
     }
 }
 
