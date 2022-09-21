@@ -39,7 +39,7 @@ ARGUMENTS:
 
 OPTIONS:
   --since <since>         Equivalent to git-log --since: Eg: '6 months ago' (default: 6 months ago)
-  --pod <pod>             The Pod to compare. If you specify something, target parameter will be ommited
+  --pod <pod>             The Pod to generate a report for. Specifying a pod disregards the target parameter
   --target <target>       The target in your Podfile file to be used
   --output-format <output-format>
                           csv or json (default: csv)
