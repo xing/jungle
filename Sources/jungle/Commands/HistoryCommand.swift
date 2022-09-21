@@ -38,7 +38,7 @@ struct HistoryCommand: AsyncParsableCommand {
         
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
-        let allTargets = try extractModulesFromPodfileLock(podfileJSON)
+        let allTargets = try extractModulesFromPodfile(podfileJSON)
         guard let targetWithDependencies = allTargets.first(where: { $0.name == target }) else {
             throw CompareError.targetNotFound(target: target)
         }
@@ -91,7 +91,7 @@ struct HistoryCommand: AsyncParsableCommand {
 
 extension GitLogEntry {
     func process(pod: String?, podfile: String, target: Module) async throws -> HistoryStatsOutput {
-        let dependencies = try extractModulesFromPodfile(podfile)
+        let dependencies = try extractModulesFromPodfileLock(podfile)
         
         let graph: Graph
         if let pod = pod {

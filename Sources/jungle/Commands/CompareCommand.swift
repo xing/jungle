@@ -45,7 +45,7 @@ struct CompareCommand: ParsableCommand {
 
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
-        let allTargets = try extractModulesFromPodfileLock(podfileJSON)
+        let allTargets = try extractModulesFromPodfile(podfileJSON)
         guard let targetWithDependencies = allTargets.first(where: { $0.name == target }) else {
             throw CompareError.targetNotFound(target: target)
         }
@@ -75,7 +75,7 @@ struct CompareCommand: ParsableCommand {
 }
 
 func process(label: String, pod: String?, podfile: String, target: Module) throws -> CompareStatsOutput {
-    let dependencies = try extractModulesFromPodfile(podfile)
+    let dependencies = try extractModulesFromPodfileLock(podfile)
     
     let graph: Graph
     if let pod = pod {

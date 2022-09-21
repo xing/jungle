@@ -12,7 +12,7 @@ final class PodExtractorTests: XCTestCase {
           - D (1.0.0)
         """
 
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 2)
     }
@@ -24,7 +24,7 @@ final class PodExtractorTests: XCTestCase {
           - B/Tests (1.0.0)
         """
 
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 1)
     }
@@ -45,7 +45,7 @@ final class PodExtractorTests: XCTestCase {
             - ACPCore
         """
 
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 1)
     }
@@ -75,12 +75,12 @@ final class PodExtractorTests: XCTestCase {
         COCOAPODS: 1.11.3
         """
         
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 2)
     }
     
-    func testTargetModulesFromPodfile() throws {
+    func testTargetModulesFromPodfileLock() throws {
         let podfile = """
         {
            "sources" : [
@@ -191,7 +191,7 @@ final class PodExtractorTests: XCTestCase {
         }
         """
         
-        let targets = try extractModulesFromPodfileLock(podfile)
+        let targets = try extractModulesFromPodfile(podfile)
         
         XCTAssertEqual(targets.count, 2)
         let expectedDependencies = ["Artsy+UIColors",

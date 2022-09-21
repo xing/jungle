@@ -53,7 +53,7 @@ struct Podfile: Decodable {
     }
 }
 
-public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module] {
+public func extractModulesFromPodfile(_ contents: String) throws -> [Module] {
     let decoder = JSONDecoder()
     decoder.keyDecodingStrategy = .convertFromSnakeCase
     
@@ -71,7 +71,7 @@ public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module]
     return targetsRaw.flatMap(\.asTarget)
 }
 
-public func extractModulesFromPodfile(_ contents: String) throws -> [Module] {
+public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module] {
     // parse YAML to JSON
     guard let yaml = try? Yams.load(yaml: contents) else {
         throw PodError.yamlParsingFailed
