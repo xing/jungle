@@ -69,7 +69,7 @@ ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock is located (default: .)
 
 OPTIONS:
-  --to <git-object>       The git objects to compare the current graph to. Eg: - 'main', 'my_branch', 'some_commit_hash'. (default: HEAD, main, master)
+  --to <git-object>       The git objects to compare the current graph to. Eg: - 'main', 'my_branch', 'some_commit_hash'. (default: HEAD, main)
   --pod <pod>             The Pod to compare. Specifying a pod disregards the target parameter
   --target <target>       The target in your Podfile file to be used
   --version               Show the version.
