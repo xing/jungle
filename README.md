@@ -70,7 +70,7 @@ ARGUMENTS:
 
 OPTIONS:
   --to <git-object>       The git objects to compare the current graph to. Eg: - 'main', 'my_branch', 'some_commit_hash'. (default: HEAD, main, master)
-  --pod <pod>             The Pod to compare. If you specify something, target parameter will be ommited
+  --pod <pod>             The Pod to compare. Specifying a pod disregards the target parameter
   --target <target>       The target in your Podfile file to be used
   --version               Show the version.
   -h, --help              Show help information.
