@@ -81,6 +81,8 @@ final class PodExtractorTests: XCTestCase {
     }
     
     func testTargetModulesFromPodfileLock() throws {
+        
+        // Example Podfile from https://github.com/artsy/eidolon
         let podfile = """
         {
            "sources" : [
@@ -223,6 +225,9 @@ final class PodExtractorTests: XCTestCase {
                         "NSObject+Rx",
                         "Action"]
         
-        XCTAssertEqual(targets.first?.dependencies, expectedDependencies)
+        let firstTarget = try XCTUnwrap(targets.first)
+        
+        XCTAssertEqual(firstTarget.name, "Kiosk")
+        XCTAssertEqual(firstTarget.dependencies, expectedDependencies)
     }
 }
