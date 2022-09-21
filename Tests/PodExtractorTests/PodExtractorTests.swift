@@ -197,37 +197,49 @@ final class PodExtractorTests: XCTestCase {
         
         XCTAssertEqual(targets.count, 2)
         let expectedDependencies = ["Artsy+UIColors",
-                        "Artsy+UILabels",
-                        "Artsy-UIButtons",
-                        "Artsy+OSSUIFonts",
-                        "FLKAutoLayout",
-                        "ARCollectionViewMasonryLayout",
-                        "SDWebImage",
-                        "SVProgressHUD",
-                        "HockeySDK-Source",
-                        "ARAnalytics/Segmentio",
-                        "ARAnalytics/HockeyApp",
-                        "CardFlight-v4",
-                        "Stripe",
-                        "ECPhoneNumberFormatter",
-                        "UIImageViewAligned",
-                        "DZNWebViewController",
-                        "ReachabilitySwift",
-                        "UIView+BooleanAnimations",
-                        "ARTiledImageView",
-                        "XNGMarkdownParser",
-                        "ISO8601DateFormatter",
-                        "SwiftyJSON",
-                        "RxSwift",
-                        "RxCocoa",
-                        "RxOptional",
-                        "Moya/RxSwift",
-                        "NSObject+Rx",
-                        "Action"]
+                                    "Artsy+UILabels",
+                                    "Artsy-UIButtons",
+                                    "Artsy+OSSUIFonts",
+                                    "FLKAutoLayout",
+                                    "ARCollectionViewMasonryLayout",
+                                    "SDWebImage",
+                                    "SVProgressHUD",
+                                    "HockeySDK-Source",
+                                    "ARAnalytics/Segmentio",
+                                    "ARAnalytics/HockeyApp",
+                                    "CardFlight-v4",
+                                    "Stripe",
+                                    "ECPhoneNumberFormatter",
+                                    "UIImageViewAligned",
+                                    "DZNWebViewController",
+                                    "ReachabilitySwift",
+                                    "UIView+BooleanAnimations",
+                                    "ARTiledImageView",
+                                    "XNGMarkdownParser",
+                                    "ISO8601DateFormatter",
+                                    "SwiftyJSON",
+                                    "RxSwift",
+                                    "RxCocoa",
+                                    "RxOptional",
+                                    "Moya/RxSwift",
+                                    "NSObject+Rx",
+                                    "Action"]
         
         let firstTarget = try XCTUnwrap(targets.first)
-        
         XCTAssertEqual(firstTarget.name, "Kiosk")
         XCTAssertEqual(firstTarget.dependencies, expectedDependencies)
+        
+        let secondTarget = try XCTUnwrap(targets.last)
+        
+        
+        XCTAssertEqual(secondTarget.name, "KioskTests")
+        XCTAssertEqual(secondTarget.dependencies, ["FBSnapshotTestCase",
+                                                   "Nimble-Snapshots",
+                                                   "Quick",
+                                                   "Nimble",
+                                                   "RxNimble",
+                                                   "Forgeries",
+                                                   "RxBlocking"]
+        )
     }
 }
