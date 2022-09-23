@@ -3,6 +3,7 @@ import Foundation
 import DependencyGraph
 import PodExtractor
 import DependencyModule
+import Shell
 
 public enum CompareError: Error {
     case targetNotFound(target: String)
@@ -45,8 +46,8 @@ struct CompareCommand: ParsableCommand {
 
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
-        let allTargets = try extractModulesFromPodfile(podfileJSON)
-        guard let targetWithDependencies = allTargets.first(where: { $0.name == target }) else {
+
+        guard let currentTargetDependencies = try moduleFromJSONPodfile(podfileJSON, onTarget: target) else {
             throw CompareError.targetNotFound(target: target)
         }
 
@@ -54,15 +55,22 @@ struct CompareCommand: ParsableCommand {
             label: "Current",
             pod: pod,
             podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock")),
-            target: targetWithDependencies
+            target: currentTargetDependencies
         )
 
         let outputs = [current] + gitObjects.compactMap {
-            try? process(
+            guard
+                let podfile = try? shell("git show \($0):Podfile"),
+                let entryTargetDependencies = try? moduleFromPodfile(podfile, on: target)
+            else {
+                return nil
+            }
+            
+            return try? process(
                 label: $0,
                 pod: pod,
                 podfile: shell("git show \($0):Podfile.lock", at: directoryURL),
-                target: targetWithDependencies
+                target: entryTargetDependencies
             )
         }
         

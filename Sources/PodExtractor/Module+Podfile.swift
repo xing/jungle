@@ -1,6 +1,7 @@
 import Yams
 import DependencyModule
 import Foundation
+import Shell
 
 public enum PodError: Error {
     case yamlParsingFailed
@@ -53,10 +54,21 @@ struct Podfile: Decodable {
     }
 }
 
-public func extractModulesFromPodfile(_ contents: String) throws -> [Module] {
+public func moduleFromPodfile(_ contents: String, on target: String) throws -> Module? {
+    let tmp_podfile = try shell("mktemp PodfileXXXX").trimmingCharacters(in: .newlines)
+    try contents.write(toFile: tmp_podfile, atomically: true, encoding: .utf8)
+    let podfileJSON = try shell("pod ipc podfile-json \(tmp_podfile) --silent")
+    return try moduleFromJSONPodfile(podfileJSON, onTarget: target)
+}
+
+public func moduleFromJSONPodfile(_ contents: String, onTarget target: String) throws -> Module? {
+    try modulesFromJSONPodfile(contents)
+        .first(where: { $0.name == target })
+}
+
+public func modulesFromJSONPodfile(_ contents: String) throws -> [Module] {
     let decoder = JSONDecoder()
     decoder.keyDecodingStrategy = .convertFromSnakeCase
-    
     guard let data = contents.data(using: .utf8),
             let pod = try? decoder.decode(Podfile.self, from: data)
     else {

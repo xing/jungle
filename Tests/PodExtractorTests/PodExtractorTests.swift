@@ -193,7 +193,7 @@ final class PodExtractorTests: XCTestCase {
         }
         """
         
-        let targets = try extractModulesFromPodfile(podfile)
+        let targets = try modulesFromJSONPodfile(podfile)
         
         XCTAssertEqual(targets.count, 2)
         let expectedDependencies = ["Artsy+UIColors",

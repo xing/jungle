@@ -3,6 +3,7 @@ import Foundation
 import DependencyGraph
 import PodExtractor
 import DependencyModule
+import Shell
 
 struct HistoryCommand: AsyncParsableCommand {
     
@@ -36,10 +37,11 @@ struct HistoryCommand: AsyncParsableCommand {
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
         let podfileURL = directoryURL.appendingPathComponent("Podfile.lock")
         
+        
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
-        let allTargets = try extractModulesFromPodfile(podfileJSON)
-        guard let targetWithDependencies = allTargets.first(where: { $0.name == target }) else {
+        
+        guard let currentTargetDependencies = try moduleFromJSONPodfile(podfileJSON, onTarget: target) else {
             throw CompareError.targetNotFound(target: target)
         }
         
@@ -52,17 +54,19 @@ struct HistoryCommand: AsyncParsableCommand {
             .map(GitLogEntry.parse)
 
         // process Podfile.lock in current directory
-        let current = try await GitLogEntry.current.process(pod: pod, podfile: String(contentsOf: podfileURL), target: targetWithDependencies)
+        let current = try await GitLogEntry.current.process(pod: pod, podfile: String(contentsOf: podfileURL), target: currentTargetDependencies)
 
         // process Podfile.lock for past commits
         let output = try await withThrowingTaskGroup(of: HistoryStatsOutput.self, returning: [HistoryStatsOutput].self) { group in
 
             for entry in logs.lazy {
                 group.addTask {
-                    try await entry.process(
+                    let podfile = try shell("git show \(entry.revision):Podfile")
+                    let entryTargetDependencies = try moduleFromPodfile(podfile, on: target) ?? .init(name: target, dependencies: [])
+                    return try await entry.process(
                         pod: pod,
                         podfile: shell("git show \(entry.revision):Podfile.lock", at: directoryURL),
-                        target: targetWithDependencies
+                        target: entryTargetDependencies
                     )
                 }
             }

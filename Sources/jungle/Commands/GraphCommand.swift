@@ -3,6 +3,7 @@ import Foundation
 import DependencyGraph
 import PodExtractor
 import DependencyModule
+import Shell
 
 struct GraphCommand: ParsableCommand {
     static var configuration = CommandConfiguration(
@@ -28,23 +29,29 @@ struct GraphCommand: ParsableCommand {
     func run() throws {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
-
-        // Choose the target to analyze
-        let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
-        let allTargets = try extractModulesFromPodfile(podfileJSON)
-        guard let targetWithDependencies = allTargets.first(where: { $0.name == target }) else {
-            throw CompareError.targetNotFound(target: target)
-        }
-        
         if let gitObject = gitObject {
+            guard
+                let podfile = try? shell("git show \(gitObject):Podfile", at: directoryURL),
+                let gitObjectTargetDependencies = try? moduleFromPodfile(podfile, on: target)
+            else {
+                throw CompareError.targetNotFound(target: target)
+            }
+            
             try print(
                 makeDOT(
                     podfile: shell("git show \(gitObject):Podfile.lock", at: directoryURL),
                     label: gitObject,
-                    target: targetWithDependencies
+                    target: gitObjectTargetDependencies
                 )
             )
         } else {
+            // Choose the target to analyze
+            let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
+            
+            guard let targetWithDependencies = try moduleFromJSONPodfile(podfileJSON, onTarget: target) else {
+                throw CompareError.targetNotFound(target: target)
+            }
+            
             print(
                 try makeDOT(
                     podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock")),

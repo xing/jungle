@@ -10,6 +10,7 @@ let package = Package(
         .executable(name: "jungle", targets: ["jungle"]),
         .library(name: "PodExtractor", targets: ["PodExtractor"]),
         .library(name: "DependencyGraph", targets: ["DependencyGraph"]),
+        .library(name: "Shell", targets: ["Shell"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.3"),
@@ -23,7 +24,8 @@ let package = Package(
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .target(name: "PodExtractor"),
-                .target(name: "DependencyGraph")
+                .target(name: "DependencyGraph"),
+                .target(name: "Shell")
             ]
         ),
         .testTarget(
@@ -36,6 +38,7 @@ let package = Package(
             name: "PodExtractor",
             dependencies: [
                 .target(name: "DependencyModule"),
+                .target(name: "Shell"),
                 .product(name: "Yams", package: "Yams")
             ]
         ),
@@ -57,6 +60,11 @@ let package = Package(
         // DependencyModule
         .target(
             name: "DependencyModule"
+        ),
+        
+        // Shell
+        .target(
+            name: "Shell"
         )
     ]
 )

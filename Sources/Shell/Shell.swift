@@ -1,6 +1,6 @@
 import Foundation
 
-func shell(_ command: String, at currentDirectoryURL: URL) throws -> String {
+public func shell(_ command: String, at currentDirectoryURL: URL? = nil) throws -> String {
     let task = Process()
     let pipe = Pipe()
 
@@ -9,7 +9,9 @@ func shell(_ command: String, at currentDirectoryURL: URL) throws -> String {
     task.arguments = ["--login", "-c", command]
     task.launchPath = "/bin/zsh"
     task.standardInput = nil
-    task.currentDirectoryURL = currentDirectoryURL
+    if let currentDirectoryURL {
+        task.currentDirectoryURL = currentDirectoryURL
+    }
     
     try task.run()
     
@@ -18,3 +20,4 @@ func shell(_ command: String, at currentDirectoryURL: URL) throws -> String {
     
     return output
 }
+
