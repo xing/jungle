@@ -1,15 +1,90 @@
 import Yams
 import DependencyModule
+import Foundation
+import Shell
 
 public enum PodError: Error {
     case yamlParsingFailed
     case missingPodsDictionary
     case missingSpecReposDictionary
-    case failedParsingPod
+    case failedParsingPod(String)
     case failedParsingPodName
+    case podTargetNotFound
 }
 
-public func extractModulesFromPodfile(_ contents: String) throws -> [Module] {
+
+struct Podfile: Decodable {
+    let sources: [String]?
+    let targetDefinitions: [TargetDefinition]
+    
+    struct TargetDefinition: Decodable {
+        let abstract: Bool
+        let name: String
+        let children: [ChildrenDefinition]
+    }
+    
+    struct ChildrenDefinition: Decodable {
+        let name: String
+        let dependencies: [Dependency]
+        let children: [ChildrenDefinition]?
+        var asTarget: [Module] {
+            let target = Module(name: name, dependencies: dependencies.compactMap(\.name))
+            let children = children ?? []
+            return children.reduce([target]) { $0 + $1.asTarget }
+        }
+        
+        struct Dependency: Decodable {
+            let name: String?
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.singleValueContainer()
+                if let name = try? container.decode(String.self) {
+                    self.name = name
+                } else if let keyName = try? container.decode([String: [String]].self).keys.first {
+                    self.name = keyName
+                    
+                } else if let keyName = try? container.decode([String: [[String: String]]].self).keys.first {
+                    self.name = keyName
+                } else {
+                    self.name = nil
+                }
+            }
+       
+        }
+    }
+}
+
+public func moduleFromPodfile(_ contents: String, on target: String) throws -> Module? {
+    let tmp_podfile = try shell("mktemp PodfileXXXX").trimmingCharacters(in: .newlines)
+    try contents.write(toFile: tmp_podfile, atomically: true, encoding: .utf8)
+    let podfileJSON = try shell("pod ipc podfile-json \(tmp_podfile) --silent")
+    _ = try shell("rm \(tmp_podfile)")
+    return try moduleFromJSONPodfile(podfileJSON, onTarget: target)
+}
+
+public func moduleFromJSONPodfile(_ contents: String, onTarget target: String) throws -> Module? {
+    try modulesFromJSONPodfile(contents)
+        .first(where: { $0.name == target })
+}
+
+public func modulesFromJSONPodfile(_ contents: String) throws -> [Module] {
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+    guard let data = contents.data(using: .utf8),
+            let pod = try? decoder.decode(Podfile.self, from: data)
+    else {
+        throw PodError.failedParsingPod(contents)
+    }
+    //first target is always Pods
+    guard let targetsRaw = pod.targetDefinitions.first?.children
+    else {
+        throw PodError.podTargetNotFound
+    }
+    
+    return targetsRaw.flatMap(\.asTarget)
+}
+
+public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module] {
     // parse YAML to JSON
     guard let yaml = try? Yams.load(yaml: contents) else {
         throw PodError.yamlParsingFailed
@@ -51,7 +126,7 @@ private func extractPodFromJSON(_ json: Any) throws -> Module {
         )
 
     } else {
-        throw PodError.failedParsingPod
+        throw PodError.failedParsingPod(json as? String ?? "")
     }
 }
 

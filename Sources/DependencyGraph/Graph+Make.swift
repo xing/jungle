@@ -6,7 +6,11 @@ public enum GraphError: Error {
 }
 
 public extension Graph {
-    static func makeForVirtualAppModule(name: String, dependencies: [Module]) throws -> Graph {
+    static func make(rootTargetName name: String, dependencies: [Module], targetDependencies: [String]?) throws -> Graph {
+        
+        let dependencies = dependencies
+            .filter { targetDependencies?.contains($0.name) ?? true }
+ 
         let appModule = Module(name: name, dependencies: dependencies.map(\.name))
 
         return try makeForModule(name: name, dependencies: [appModule] + dependencies)

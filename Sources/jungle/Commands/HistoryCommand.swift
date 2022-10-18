@@ -2,6 +2,8 @@ import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
+import DependencyModule
+import Shell
 
 struct HistoryCommand: AsyncParsableCommand {
     
@@ -18,8 +20,11 @@ struct HistoryCommand: AsyncParsableCommand {
     @Option(help: "Equivalent to git-log --since: Eg: '6 months ago'")
     var since: String = "6 months ago"
 
-    @Option(help: "The Pod to generate a report for. Omitting this generates a report for a virtual `App` target that imports all Pods")
+    @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
     var pod: String?
+
+    @Option(help: "The target in your Podfile file to be used")
+    var target: String
     
     @Option(help: "csv or json")
     var outputFormat: OutputFormat = .csv
@@ -32,6 +37,14 @@ struct HistoryCommand: AsyncParsableCommand {
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
         let podfileURL = directoryURL.appendingPathComponent("Podfile.lock")
         
+        
+        // Choose the target to analyze
+        let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
+        
+        guard let currentTargetDependencies = try moduleFromJSONPodfile(podfileJSON, onTarget: target) else {
+            throw CompareError.targetNotFound(target: target)
+        }
+        
         // retrieve logs
         let gitLog = "git log --since='\(since)' --first-parent --format='%h;%aI;%an;%s' -- Podfile.lock"
         let logs = try shell(gitLog, at: directoryURL)
@@ -41,16 +54,19 @@ struct HistoryCommand: AsyncParsableCommand {
             .map(GitLogEntry.parse)
 
         // process Podfile.lock in current directory
-        let current = try await GitLogEntry.current.process(pod: pod, podfile: String(contentsOf: podfileURL))
+        let current = try await GitLogEntry.current.process(pod: pod, podfile: String(contentsOf: podfileURL), target: currentTargetDependencies)
 
         // process Podfile.lock for past commits
         let output = try await withThrowingTaskGroup(of: HistoryStatsOutput.self, returning: [HistoryStatsOutput].self) { group in
 
             for entry in logs.lazy {
                 group.addTask {
-                    try await entry.process(
+                    let podfile = try shell("git show \(entry.revision):Podfile", at: directoryURL)
+                    let entryTargetDependencies = try moduleFromPodfile(podfile, on: target) ?? .init(name: target, dependencies: [])
+                    return try await entry.process(
                         pod: pod,
-                        podfile: shell("git show \(entry.revision):Podfile.lock", at: directoryURL)
+                        podfile: shell("git show \(entry.revision):Podfile.lock", at: directoryURL),
+                        target: entryTargetDependencies
                     )
                 }
             }
@@ -78,14 +94,14 @@ struct HistoryCommand: AsyncParsableCommand {
 }
 
 extension GitLogEntry {
-    func process(pod: String?, podfile: String) async throws -> HistoryStatsOutput {
-        let dependencies = try extractModulesFromPodfile(podfile)
+    func process(pod: String?, podfile: String, target: Module) async throws -> HistoryStatsOutput {
+        let dependencies = try extractModulesFromPodfileLock(podfile)
         
         let graph: Graph
         if let pod = pod {
             graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
         } else {
-            graph = try Graph.makeForVirtualAppModule(name: "App", dependencies: dependencies)
+            graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
         }
         
         return HistoryStatsOutput(entry: self, graph: graph)

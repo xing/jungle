@@ -1,16 +1,18 @@
 import Foundation
 
-func shell(_ command: String, at currentDirectoryURL: URL) throws -> String {
+public func shell(_ command: String, at currentDirectoryURL: URL? = nil) throws -> String {
     let task = Process()
     let pipe = Pipe()
 
     task.standardOutput = pipe
     task.standardError = pipe
-    task.arguments = ["-c", command]
+    task.arguments = ["--login", "-c", command]
     task.launchPath = "/bin/zsh"
     task.standardInput = nil
-    task.currentDirectoryURL = currentDirectoryURL
-
+    if let currentDirectoryURL = currentDirectoryURL {
+        task.currentDirectoryURL = currentDirectoryURL
+    }
+    
     try task.run()
     
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
@@ -18,3 +20,4 @@ func shell(_ command: String, at currentDirectoryURL: URL) throws -> String {
     
     return output
 }
+

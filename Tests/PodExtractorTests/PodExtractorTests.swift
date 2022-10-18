@@ -12,7 +12,7 @@ final class PodExtractorTests: XCTestCase {
           - D (1.0.0)
         """
 
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 2)
     }
@@ -24,7 +24,7 @@ final class PodExtractorTests: XCTestCase {
           - B/Tests (1.0.0)
         """
 
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 1)
     }
@@ -45,7 +45,7 @@ final class PodExtractorTests: XCTestCase {
             - ACPCore
         """
 
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 1)
     }
@@ -75,8 +75,171 @@ final class PodExtractorTests: XCTestCase {
         COCOAPODS: 1.11.3
         """
         
-        let modules = try extractModulesFromPodfile(podfile)
+        let modules = try extractModulesFromPodfileLock(podfile)
 
         XCTAssertEqual(modules.count, 2)
+    }
+    
+    func testTargetModulesFromPodfileLock() throws {
+        
+        // Example Podfile from https://github.com/artsy/eidolon
+        let podfile = """
+        {
+           "sources" : [
+              "https://github.com/artsy/Specs.git",
+              "https://cdn.cocoapods.org/"
+           ],
+           "target_definitions" : [
+              {
+                 "abstract" : true,
+                 "children" : [
+                    {
+                       "children" : [
+                          {
+                             "abstract" : false,
+                             "dependencies" : [
+                                "FBSnapshotTestCase",
+                                "Nimble-Snapshots",
+                                "Quick",
+                                "Nimble",
+                                "RxNimble",
+                                "Forgeries",
+                                "RxBlocking"
+                             ],
+                             "inheritance" : "search_paths",
+                             "name" : "KioskTests"
+                          }
+                       ],
+                       "dependencies" : [
+                          "Artsy+UIColors",
+                          "Artsy+UILabels",
+                          "Artsy-UIButtons",
+                          "Artsy+OSSUIFonts",
+                          {
+                             "FLKAutoLayout" : [
+                                "0.1.1"
+                             ]
+                          },
+                          {
+                             "ARCollectionViewMasonryLayout" : [
+                                "~> 2.0.0"
+                             ]
+                          },
+                          {
+                             "SDWebImage" : [
+                                "~> 3.7"
+                             ]
+                          },
+                          "SVProgressHUD",
+                          {
+                             "HockeySDK-Source" : [
+                                {
+                                   "git" : "https://github.com/bitstadium/HockeySDK-iOS.git"
+                                }
+                             ]
+                          },
+                          "ARAnalytics/Segmentio",
+                          "ARAnalytics/HockeyApp",
+                          "CardFlight-v4",
+                          {
+                             "Stripe" : [
+                                "14.0.1"
+                             ]
+                          },
+                          "ECPhoneNumberFormatter",
+                          {
+                             "UIImageViewAligned" : [
+                                {
+                                   "git" : "https://github.com/ashfurrow/UIImageViewAligned.git"
+                                }
+                             ]
+                          },
+                          {
+                             "DZNWebViewController" : [
+                                {
+                                   "git" : "https://github.com/orta/DZNWebViewController.git"
+                                }
+                             ]
+                          },
+                          "ReachabilitySwift",
+                          "UIView+BooleanAnimations",
+                          "ARTiledImageView",
+                          "XNGMarkdownParser",
+                          "ISO8601DateFormatter",
+                          "SwiftyJSON",
+                          "RxSwift",
+                          "RxCocoa",
+                          "RxOptional",
+                          "Moya/RxSwift",
+                          "NSObject+Rx",
+                          "Action"
+                       ],
+                       "name" : "Kiosk"
+                    }
+                 ],
+                 "inhibit_warnings" : {
+                    "all" : true
+                 },
+                 "name" : "Pods",
+                 "platform" : {
+                    "ios" : "10.0"
+                 },
+                 "uses_frameworks" : {
+                    "linkage" : "dynamic",
+                    "packaging" : "framework"
+                 }
+              }
+           ]
+        }
+        """
+        
+        let targets = try modulesFromJSONPodfile(podfile)
+        
+        XCTAssertEqual(targets.count, 2)
+        let expectedDependencies = ["Artsy+UIColors",
+                                    "Artsy+UILabels",
+                                    "Artsy-UIButtons",
+                                    "Artsy+OSSUIFonts",
+                                    "FLKAutoLayout",
+                                    "ARCollectionViewMasonryLayout",
+                                    "SDWebImage",
+                                    "SVProgressHUD",
+                                    "HockeySDK-Source",
+                                    "ARAnalytics/Segmentio",
+                                    "ARAnalytics/HockeyApp",
+                                    "CardFlight-v4",
+                                    "Stripe",
+                                    "ECPhoneNumberFormatter",
+                                    "UIImageViewAligned",
+                                    "DZNWebViewController",
+                                    "ReachabilitySwift",
+                                    "UIView+BooleanAnimations",
+                                    "ARTiledImageView",
+                                    "XNGMarkdownParser",
+                                    "ISO8601DateFormatter",
+                                    "SwiftyJSON",
+                                    "RxSwift",
+                                    "RxCocoa",
+                                    "RxOptional",
+                                    "Moya/RxSwift",
+                                    "NSObject+Rx",
+                                    "Action"]
+        
+        let firstTarget = try XCTUnwrap(targets.first)
+        XCTAssertEqual(firstTarget.name, "Kiosk")
+        XCTAssertEqual(firstTarget.dependencies, expectedDependencies)
+        
+        let secondTarget = try XCTUnwrap(targets.last)
+        
+        
+        XCTAssertEqual(secondTarget.name, "KioskTests")
+        XCTAssertEqual(secondTarget.dependencies, ["FBSnapshotTestCase",
+                                                   "Nimble-Snapshots",
+                                                   "Quick",
+                                                   "Nimble",
+                                                   "RxNimble",
+                                                   "Forgeries",
+                                                   "RxBlocking"]
+        )
     }
 }

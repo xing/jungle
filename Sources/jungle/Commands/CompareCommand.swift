@@ -2,6 +2,21 @@ import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
+import DependencyModule
+import Shell
+
+public enum CompareError: Error {
+    case targetNotFound(target: String)
+}
+
+extension CompareError: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .targetNotFound(let target):
+            return "\"\(target)\" target not found!. Please, provide an existent target in your Podfile."
+        }
+    }
+}
 
 struct CompareCommand: ParsableCommand {
     static var configuration = CommandConfiguration(
@@ -16,8 +31,11 @@ struct CompareCommand: ParsableCommand {
     )
     var gitObjects: [String] = ["HEAD", "main", "master"]
 
-    @Option(help: "The Pod to compare. Omitting this generates compares a virtual `App` target that imports all Pods")
+    @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
     var pod: String?
+    
+    @Option(help: "The target in your Podfile file to be used")
+    var target: String
 
     @Argument(help: "Path to the directory where Podfile.lock is located")
     var directoryPath: String = "."
@@ -26,17 +44,33 @@ struct CompareCommand: ParsableCommand {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
 
+        // Choose the target to analyze
+        let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
+
+        guard let currentTargetDependencies = try moduleFromJSONPodfile(podfileJSON, onTarget: target) else {
+            throw CompareError.targetNotFound(target: target)
+        }
+
         let current = try process(
             label: "Current",
             pod: pod,
-            podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock"))
+            podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock")),
+            target: currentTargetDependencies
         )
 
         let outputs = [current] + gitObjects.compactMap {
-            try? process(
+            guard
+                let podfile = try? shell("git show \($0):Podfile"),
+                let entryTargetDependencies = try? moduleFromPodfile(podfile, on: target)
+            else {
+                return nil
+            }
+            
+            return try? process(
                 label: $0,
                 pod: pod,
-                podfile: shell("git show \($0):Podfile.lock", at: directoryURL)
+                podfile: shell("git show \($0):Podfile.lock", at: directoryURL),
+                target: entryTargetDependencies
             )
         }
         
@@ -48,14 +82,14 @@ struct CompareCommand: ParsableCommand {
     }
 }
 
-func process(label: String, pod: String?, podfile: String) throws -> CompareStatsOutput {
-    let dependencies = try extractModulesFromPodfile(podfile)
+func process(label: String, pod: String?, podfile: String, target: Module) throws -> CompareStatsOutput {
+    let dependencies = try extractModulesFromPodfileLock(podfile)
     
     let graph: Graph
     if let pod = pod {
         graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
     } else {
-        graph = try Graph.makeForVirtualAppModule(name: "App", dependencies: dependencies)
+        graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
     }
         
     return CompareStatsOutput(label: label, graph: graph)
