@@ -7,7 +7,7 @@ public enum PodError: Error {
     case yamlParsingFailed
     case missingPodsDictionary
     case missingSpecReposDictionary
-    case failedParsingPod
+    case failedParsingPod(String)
     case failedParsingPodName
     case podTargetNotFound
 }
@@ -58,6 +58,7 @@ public func moduleFromPodfile(_ contents: String, on target: String) throws -> M
     let tmp_podfile = try shell("mktemp PodfileXXXX").trimmingCharacters(in: .newlines)
     try contents.write(toFile: tmp_podfile, atomically: true, encoding: .utf8)
     let podfileJSON = try shell("pod ipc podfile-json \(tmp_podfile) --silent")
+    _ = try shell("rm \(tmp_podfile)")
     return try moduleFromJSONPodfile(podfileJSON, onTarget: target)
 }
 
@@ -72,7 +73,7 @@ public func modulesFromJSONPodfile(_ contents: String) throws -> [Module] {
     guard let data = contents.data(using: .utf8),
             let pod = try? decoder.decode(Podfile.self, from: data)
     else {
-        throw PodError.failedParsingPod
+        throw PodError.failedParsingPod(contents)
     }
     //first target is always Pods
     guard let targetsRaw = pod.targetDefinitions.first?.children
@@ -125,7 +126,7 @@ private func extractPodFromJSON(_ json: Any) throws -> Module {
         )
 
     } else {
-        throw PodError.failedParsingPod
+        throw PodError.failedParsingPod(json as? String ?? "")
     }
 }
 

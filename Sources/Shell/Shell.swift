@@ -9,7 +9,7 @@ public func shell(_ command: String, at currentDirectoryURL: URL? = nil) throws 
     task.arguments = ["--login", "-c", command]
     task.launchPath = "/bin/zsh"
     task.standardInput = nil
-    if let currentDirectoryURL {
+    if let currentDirectoryURL = currentDirectoryURL {
         task.currentDirectoryURL = currentDirectoryURL
     }
     

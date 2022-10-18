@@ -61,7 +61,7 @@ struct HistoryCommand: AsyncParsableCommand {
 
             for entry in logs.lazy {
                 group.addTask {
-                    let podfile = try shell("git show \(entry.revision):Podfile")
+                    let podfile = try shell("git show \(entry.revision):Podfile", at: directoryURL)
                     let entryTargetDependencies = try moduleFromPodfile(podfile, on: target) ?? .init(name: target, dependencies: [])
                     return try await entry.process(
                         pod: pod,
