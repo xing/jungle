@@ -25,10 +25,10 @@ struct Podfile: Decodable {
     
     struct ChildrenDefinition: Decodable {
         let name: String
-        let dependencies: [Dependency]
+        let dependencies: [Dependency]?
         let children: [ChildrenDefinition]?
         var asTarget: [Module] {
-            let target = Module(name: name, dependencies: dependencies.compactMap(\.name))
+            let target = Module(name: name, dependencies: dependencies?.compactMap(\.name) ?? [])
             let children = children ?? []
             return children.reduce([target]) { $0 + $1.asTarget }
         }

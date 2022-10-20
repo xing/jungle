@@ -80,7 +80,7 @@ final class PodExtractorTests: XCTestCase {
         XCTAssertEqual(modules.count, 2)
     }
     
-    func testTargetModulesFromPodfileLock() throws {
+    func testTargetModulesFromPodfile() throws {
         
         // Example Podfile from https://github.com/artsy/eidolon
         let podfile = """
@@ -241,5 +241,101 @@ final class PodExtractorTests: XCTestCase {
                                                    "Forgeries",
                                                    "RxBlocking"]
         )
+    }
+    
+    func testTargetModulesFromPodfileNoDependenciesInChildren() throws {
+        
+        let podfile = """
+        {
+          "target_definitions": [
+            {
+              "name": "Pods",
+              "abstract": true,
+              "platform": {
+                "ios": "16.0"
+              },
+              "uses_frameworks": {
+                "linkage": "dynamic",
+                "packaging": "framework"
+              },
+              "inhibit_warnings": {
+                "all": true
+              },
+              "children": [
+                {
+                  "name": "FromCocoaToSPM",
+                  "inhibit_warnings": {
+                    "for_pods": [
+                      "Appboy-iOS-SDK",
+                      "Alamofire",
+                      "Amplitude"
+                    ]
+                  },
+                  "dependencies": [
+                    {
+                      "Appboy-iOS-SDK": [
+                        "4.5.1"
+                      ]
+                    },
+                    {
+                      "Alamofire": [
+                        "5.6.1"
+                      ]
+                    },
+                    {
+                      "Amplitude": [
+                        "8.11.0"
+                      ]
+                    },
+                    {
+                      "AppFeature": [
+                        {
+                          "path": "InternalDependencies/AppFeature"
+                        }
+                      ]
+                    },
+                    {
+                      "ProductsFeature": [
+                        {
+                          "path": "InternalDependencies/ProductsFeature"
+                        }
+                      ]
+                    },
+                    {
+                      "SettingsFeature": [
+                        {
+                          "path": "InternalDependencies/SettingsFeature"
+                        }
+                      ]
+                    },
+                    {
+                      "UIComponents": [
+                        {
+                          "path": "InternalDependencies/UIComponents"
+                        }
+                      ]
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "FromCocoaToSPMTests",
+                      "abstract": false,
+                      "inheritance": "search_paths"
+                    },
+                    {
+                      "name": "FromCocoaToSPMUITests"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        """
+        
+        let targets = try modulesFromJSONPodfile(podfile)
+        
+        XCTAssertEqual(targets.count, 3)
+ 
     }
 }
