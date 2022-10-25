@@ -4,6 +4,7 @@ import DependencyGraph
 import PodExtractor
 import DependencyModule
 import Shell
+import SPMExtractor
 
 struct GraphCommand: ParsableCommand {
     static var configuration = CommandConfiguration(
@@ -17,18 +18,34 @@ struct GraphCommand: ParsableCommand {
     )
     var gitObject: String?
 
-    @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
-    var pod: String?
+    @Option(help: "The Module to compare. If you specify something, target parameter will be ommited")
+    var module: String?
 
     @Option(help: "The target in your Podfile file to be used")
     var target: String
     
-    @Argument(help: "Path to the directory where Podfile.lock is located")
+    
+    @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
     var directoryPath: String = "."
 
+    
+    
     func run() throws {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
+        
+        // Check when this contains a Package.swift or a Podfile
+        if FileManager.default.fileExists(atPath: directoryURL.appendingPathComponent("Package.swift").path) {
+            try processPackage(at: directoryURL)
+        } else {
+            try processPodfile(at: directoryURL)
+        }
+    }
+    func processPackage(at directoryURL: URL) throws {
+        try extractPackage(from: directoryURL, target: target)
+    }
+
+    func processPodfile(at directoryURL: URL) throws {
         if let gitObject = gitObject {
             guard
                 let podfile = try? shell("git show \(gitObject):Podfile", at: directoryURL),
@@ -66,8 +83,8 @@ struct GraphCommand: ParsableCommand {
         let dependencies = try extractModulesFromPodfileLock(podfile)
         
         let graph: Graph
-        if let pod = pod {
-            graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
+        if let module = module {
+            graph = try Graph.makeForModule(name: module, dependencies: dependencies)
         } else {
             graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
         }

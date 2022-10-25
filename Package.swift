@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .executable(name: "jungle", targets: ["jungle"]),
         .library(name: "PodExtractor", targets: ["PodExtractor"]),
+        .library(name: "SPMExtractor", targets: ["SPMExtractor"]),
         .library(name: "DependencyGraph", targets: ["DependencyGraph"]),
         .library(name: "Shell", targets: ["Shell"])
     ],
@@ -24,6 +25,7 @@ let package = Package(
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .target(name: "PodExtractor"),
+                .target(name: "SPMExtractor"),
                 .target(name: "DependencyGraph"),
                 .target(name: "Shell")
             ]
@@ -33,7 +35,7 @@ let package = Package(
             dependencies: ["jungle"]
         ),
         
-        // PodExtractor
+        // Pod Extractor
         .target(
             name: "PodExtractor",
             dependencies: [
@@ -46,7 +48,15 @@ let package = Package(
             name: "PodExtractorTests",
             dependencies: ["PodExtractor"]
         ),
-
+        // SPM Extractor
+        .target(
+            name: "SPMExtractor",
+            dependencies: [
+                .target(name: "DependencyModule"),
+                .target(name: "Shell"),
+            ]
+        ),
+        
         // DependencyGraph
         .target(
             name: "DependencyGraph",
