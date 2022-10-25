@@ -9,7 +9,7 @@ public extension Graph {
 
     
 
-        return "\(header) \(edges) \(footer) \(stats)"
+        return "\(header) \(edges) \(footer)"
     }
 
     var stats: String {

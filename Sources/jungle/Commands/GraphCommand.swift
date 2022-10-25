@@ -44,7 +44,7 @@ struct GraphCommand: ParsableCommand {
         }
     }
     func processPackage(at directoryURL: URL) throws {
-        try extractPackage(from: directoryURL, target: target)
+        try extractPackage(from: directoryURL, target: target, useMultiedge: useMultiedge)
     }
 
     func processPodfile(at directoryURL: URL) throws {

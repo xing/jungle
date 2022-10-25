@@ -37,7 +37,7 @@ extension TargetError: CustomStringConvertible {
 }
 
 
-public func extractPackage(from directoryURL: URL, target: String) throws {
+public func extractPackage(from directoryURL: URL, target: String, useMultiedge: Bool) throws {
  
     let packageRaw = try shell("swift package describe --type json", at: directoryURL).data(using: .utf8)!
 
@@ -55,7 +55,7 @@ public func extractPackage(from directoryURL: URL, target: String) throws {
     
     let graph = try Graph.make(rootTargetName: target, dependencies: dependencies + external, targetDependencies: targetDependencies)
     
-    print(graph.multiEdgeDOT)
+    print(useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT)
 }
 
 
