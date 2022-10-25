@@ -13,7 +13,7 @@ public extension Graph {
     }
 
     var stats: String {
-        "# nodes: \(nodes.count), edges: \(multiEdges.count), complexity: \(multiGraphComplexity)"
+        "nodes: \(nodes.count), edges: \(multiEdges.count), complexity: \(multiGraphComplexity)"
     }
     
     var uniqueEdgeDOT: String {
@@ -21,9 +21,8 @@ public extension Graph {
             .map { "\t \"\($0.source)\" -> \"\($0.target)\"" }
             .joined(separator: "\n")
 
-        let stats = "nodes: \(nodes.count), edges: \(uniqueEdges.count), complexity: \(multiGraphComplexity)"
 
-        return "\(header) \(edges) \(footer) \(stats)"
+        return "\(header) \(edges) \(footer)"
     }
 
     private var header: String {
