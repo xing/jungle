@@ -27,6 +27,9 @@ struct GraphCommand: ParsableCommand {
     @Flag(help: "Use multi-edge or unique-edge configuration")
     var useMultiedge: Bool = false
     
+    @Flag(help: "Show Externals modules dependencies")
+    var showExternals: Bool = false
+    
     @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
     var directoryPath: String = "."
 
@@ -82,7 +85,7 @@ struct GraphCommand: ParsableCommand {
     }
     
     private func makeDOT(podfile: String, label: String, target: Module) throws -> String {
-        let dependencies = try extractModulesFromPodfileLock(podfile)
+        let dependencies = try extractModulesFromPodfileLock(podfile, excludeExternals: !showExternals)
         
         let graph: Graph
         if let module = module {

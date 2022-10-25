@@ -12,7 +12,7 @@ struct Package: Decodable {
         let productDependencies: [String]?
         
         var dependencies: [String] {
-            (targetDependencies ?? []) + (productDependencies ?? [])
+            [targetDependencies, productDependencies].compactMap { $0 }.flatMap { $0 }
         }
         
         enum CodingKeys: String, CodingKey {

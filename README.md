@@ -118,7 +118,7 @@ jungle compare --target App ProjectDirectory/ --to main
 ```shell
 OVERVIEW: Outputs the dependency graph in DOT format
 
-USAGE: jungle graph [--of <git-object>] [--module <module>] --target <target> [--use-multiedge] [<directory-path>]
+USAGE: jungle graph [--of <git-object>] [--module <module>] --target <target> [--use-multiedge] [--show-externals] [<directory-path>]
 
 ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
@@ -128,8 +128,9 @@ OPTIONS:
   --module <module>       The Module to compare. If you specify something, target parameter will be ommited
   --target <target>       The target in your Podfile or Package.swift file to be used
   --use-multiedge         Use multi-edge or unique-edge configuration
+  --show-externals        Show Externals modules dependencies
   --version               Show the version.
-  -h, --help              Show help information.
+  -h, --help              Show help information
 
 ```
 
