@@ -24,6 +24,8 @@ struct GraphCommand: ParsableCommand {
     @Option(help: "The target in your Podfile file to be used")
     var target: String
     
+    @Flag(help: "Use multi-edge or unique-edge configuration")
+    var useMultiedge: Bool = false
     
     @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
     var directoryPath: String = "."
@@ -89,6 +91,6 @@ struct GraphCommand: ParsableCommand {
             graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
         }
         
-        return graph.multiEdgeDOT
+        return useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT
     }
 }

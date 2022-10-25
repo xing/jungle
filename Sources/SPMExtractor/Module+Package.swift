@@ -23,6 +23,19 @@ struct Package: Decodable {
     }
 }
 
+public enum TargetError: Error {
+    case targetNotFound(target: String)
+}
+
+extension TargetError: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .targetNotFound(let target):
+            return "\"\(target)\" target not found in Package.swift!. Please, provide an existent target in your Package."
+        }
+    }
+}
+
 
 public func extractPackage(from directoryURL: URL, target: String) throws {
  
@@ -32,8 +45,7 @@ public func extractPackage(from directoryURL: URL, target: String) throws {
 
     
     guard let targetModules = package.targets.filter({ $0.name == target }).first else {
-        return
-        //throw CompareError.targetNotFound(target: target)
+        throw TargetError.targetNotFound(target: target)
     }
 
     let dependencies = extractDependencies(from: package, on: target)
@@ -43,7 +55,7 @@ public func extractPackage(from directoryURL: URL, target: String) throws {
     
     let graph = try Graph.make(rootTargetName: target, dependencies: dependencies + external, targetDependencies: targetDependencies)
     
-    print(graph.uniqueEdgeDOT)
+    print(graph.multiEdgeDOT)
 }
 
 
