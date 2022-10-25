@@ -2,7 +2,7 @@
 
 [![Swift](https://github.com/xing/jungle/actions/workflows/swift.yml/badge.svg)](https://github.com/xing/jungle/actions/workflows/swift.yml)
 
-A Swift command line tool to extract dependency information from a CocoaPods-based Xcode project. Currently, that´s what you can do:
+A Swift CLI to extract dependency information from a Xcode project (from Cocoapods or Swift Package Manager). Currently, that´s what you can do:
 - Dependency graph (dot format)
 - Cyclomatic complexity evaluation 
 - Number of dependant modules
@@ -118,17 +118,18 @@ jungle compare --target App ProjectDirectory/ --to main
 ```shell
 OVERVIEW: Outputs the dependency graph in DOT format
 
-USAGE: jungle graph [--of <git-object>] [--pod <pod>] --target <target> [<directory-path>]
+USAGE: jungle graph [--of <git-object>] [--module <module>] --target <target> [--use-multiedge] [<directory-path>]
 
 ARGUMENTS:
-  <directory-path>        Path to the directory where Podfile.lock is located (default: .)
+  <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
 
 OPTIONS:
   --of <git-object>       A git object representing the version to draw the graph for. Eg: - 'main', 'my_branch', 'some_commit_hash'.
-  --pod <pod>             The Pod to compare. Specifying a pod disregards the target parameter
-  --target <target>       The target in your Podfile file to be used
+  --module <module>       The Module to compare. If you specify something, target parameter will be ommited
+  --target <target>       The target in your Podfile or Package.swift file to be used
+  --use-multiedge         Use multi-edge or unique-edge configuration
   --version               Show the version.
-  -h, --help              Show help information
+  -h, --help              Show help information.
 
 ```
 
