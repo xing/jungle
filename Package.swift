@@ -39,8 +39,8 @@ let package = Package(
         .target(
             name: "PodExtractor",
             dependencies: [
-                .target(name: "DependencyModule"),
-                .target(name: "Shell"),
+                "DependencyModule",
+                "Shell",
                 .product(name: "Yams", package: "Yams")
             ]
         ),
@@ -52,8 +52,9 @@ let package = Package(
         .target(
             name: "SPMExtractor",
             dependencies: [
-                .target(name: "DependencyModule"),
-                .target(name: "Shell"),
+                "DependencyModule",
+                "Shell",
+                "DependencyGraph"
             ]
         ),
         
