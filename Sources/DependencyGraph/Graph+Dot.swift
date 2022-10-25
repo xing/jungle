@@ -21,7 +21,7 @@ public extension Graph {
             .map { "\t \"\($0.source)\" -> \"\($0.target)\"" }
             .joined(separator: "\n")
 
-        let stats = "# nodes: \(nodes.count), edges: \(uniqueEdges.count), complexity: \(multiGraphComplexity)"
+        let stats = "nodes: \(nodes.count), edges: \(uniqueEdges.count), complexity: \(multiGraphComplexity)"
 
         return "\(header) \(edges) \(footer) \(stats)"
     }
