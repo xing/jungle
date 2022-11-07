@@ -53,8 +53,7 @@ let package = Package(
             name: "SPMExtractor",
             dependencies: [
                 "DependencyModule",
-                "Shell",
-                "DependencyGraph"
+                "Shell"
             ]
         ),
         .testTarget(
