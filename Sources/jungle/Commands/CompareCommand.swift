@@ -60,7 +60,7 @@ struct CompareCommand: ParsableCommand {
 
         let outputs = [current] + gitObjects.compactMap {
             guard
-                let podfile = try? shell("git show \($0):Podfile"),
+                let podfile = try? shell("git show \($0):Podfile", at: directoryURL),
                 let entryTargetDependencies = try? moduleFromPodfile(podfile, on: target)
             else {
                 return nil

@@ -99,9 +99,9 @@ public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module]
 
     // parse JSON "SPEC REPOS" to [String]
     let externalsDictionary = podsDictionary["SPEC REPOS"] as? [AnyHashable: Any]
-    let externals = externalsDictionary?.values.first as? [String] ?? []
-
-
+    
+    let externals = externalsDictionary?.values.compactMap { $0 as? [String] }.flatMap { $0 } ?? []
+ 
     let pods = try rawPods.map(extractPodFromJSON)
 
     // Exclude Test and External Pods
