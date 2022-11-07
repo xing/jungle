@@ -57,7 +57,10 @@ let package = Package(
                 "DependencyGraph"
             ]
         ),
-        
+        .testTarget(
+            name: "SPMExtractorTests",
+            dependencies: ["SPMExtractor"]
+        ),
         // DependencyGraph
         .target(
             name: "DependencyGraph",

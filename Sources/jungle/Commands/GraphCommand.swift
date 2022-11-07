@@ -33,8 +33,6 @@ struct GraphCommand: ParsableCommand {
     @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
     var directoryPath: String = "."
 
-    
-    
     func run() throws {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
@@ -47,7 +45,14 @@ struct GraphCommand: ParsableCommand {
         }
     }
     func processPackage(at directoryURL: URL) throws {
-        try extractPackage(from: directoryURL, target: target, useMultiedge: useMultiedge)
+        let packageRaw = try shell("swift package describe --type json", at: directoryURL)
+        
+        let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
+        
+        let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+        
+        print(useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT)
+        
     }
 
     func processPodfile(at directoryURL: URL) throws {

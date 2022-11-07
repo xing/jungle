@@ -3,10 +3,10 @@ import DependencyModule
 import DependencyGraph
 import Shell
 
-struct Package: Decodable {
-    let targets: [Target]
+public struct Package: Decodable {
+    public let targets: [Target]
     
-    struct Target: Decodable {
+    public struct Target: Decodable {
         let name: String
         let targetDependencies: [String]?
         let productDependencies: [String]?
@@ -36,13 +36,8 @@ extension TargetError: CustomStringConvertible {
     }
 }
 
-
-public func extractPackage(from directoryURL: URL, target: String, useMultiedge: Bool) throws {
- 
-    let packageRaw = try shell("swift package describe --type json", at: directoryURL).data(using: .utf8)!
-
-    let package = try JSONDecoder().decode(Package.self, from: packageRaw)
-
+public func extracPackageModules(from packageRaw: String, target: String) throws -> ([Module], [String]) {
+    let package = try JSONDecoder().decode(Package.self, from: packageRaw.data(using: .utf8)!)
     
     guard let targetModules = package.targets.filter({ $0.name == target }).first else {
         throw TargetError.targetNotFound(target: target)
@@ -52,14 +47,11 @@ public func extractPackage(from directoryURL: URL, target: String, useMultiedge:
     let external = targetModules.productDependencies?.compactMap { Module(name: $0, dependencies: []) } ?? []
 
     let targetDependencies = targetModules.dependencies
-    
-    let graph = try Graph.make(rootTargetName: target, dependencies: dependencies + external, targetDependencies: targetDependencies)
-    
-    print(useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT)
+    return (dependencies + external, targetDependencies)
 }
 
 
-func extractDependencies(from package: Package, on target: String) -> [Module] {
+public func extractDependencies(from package: Package, on target: String) -> [Module] {
     guard
         let targetModules = package.targets.filter({ $0.name == target }).first
     else {
