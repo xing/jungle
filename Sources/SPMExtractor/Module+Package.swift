@@ -1,6 +1,5 @@
 import Foundation
 import DependencyModule
-import DependencyGraph
 import Shell
 
 public struct Package: Decodable {
