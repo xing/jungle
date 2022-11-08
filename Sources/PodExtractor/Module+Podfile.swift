@@ -12,17 +12,16 @@ public enum PodError: Error {
     case podTargetNotFound
 }
 
-
 struct Podfile: Decodable {
     let sources: [String]?
     let targetDefinitions: [TargetDefinition]
-    
+
     struct TargetDefinition: Decodable {
         let abstract: Bool
         let name: String
         let children: [ChildrenDefinition]
     }
-    
+
     struct ChildrenDefinition: Decodable {
         let name: String
         let dependencies: [Dependency]?
@@ -32,7 +31,7 @@ struct Podfile: Decodable {
             let children = children ?? []
             return children.reduce([target]) { $0 + $1.asTarget }
         }
-        
+
         struct Dependency: Decodable {
             let name: String?
 
@@ -42,14 +41,14 @@ struct Podfile: Decodable {
                     self.name = name
                 } else if let keyName = try? container.decode([String: [String]].self).keys.first {
                     self.name = keyName
-                    
+
                 } else if let keyName = try? container.decode([String: [[String: String]]].self).keys.first {
                     self.name = keyName
                 } else {
                     self.name = nil
                 }
             }
-       
+
         }
     }
 }
@@ -75,12 +74,12 @@ public func modulesFromJSONPodfile(_ contents: String) throws -> [Module] {
     else {
         throw PodError.failedParsingPod(contents)
     }
-    //first target is always Pods
+    // first target is always Pods
     guard let targetsRaw = pod.targetDefinitions.first?.children
     else {
         throw PodError.podTargetNotFound
     }
-    
+
     return targetsRaw.flatMap(\.asTarget)
 }
 
@@ -99,8 +98,10 @@ public func extractModulesFromPodfileLock(_ contents: String, excludeExternals: 
 
     // parse JSON "SPEC REPOS" to [String]
     let externalsDictionary = podsDictionary["SPEC REPOS"] as? [AnyHashable: Any]
-    
-    let externals = excludeExternals ?  externalsDictionary?.values.first as? [String] ?? [] : []
+
+    let externals = excludeExternals ? externalsDictionary?.values
+        .compactMap { $0 as? [String] }
+        .flatMap { $0 } ?? [] : []
 
     let pods = try rawPods.map(extractPodFromJSON)
 
@@ -136,5 +137,3 @@ private func clean(_ name: String) throws -> String {
     }
     return String(cleanName)
 }
-
-
