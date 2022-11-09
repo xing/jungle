@@ -52,7 +52,6 @@ struct GraphCommand: ParsableCommand {
         let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
         
         print(useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT)
-        
     }
 
     func processPodfile(at directoryURL: URL) throws {

@@ -2,6 +2,7 @@ import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
+import SPMExtractor
 import DependencyModule
 import Shell
 
@@ -34,16 +35,61 @@ struct CompareCommand: ParsableCommand {
     @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
     var pod: String?
     
-    @Option(help: "The target in your Podfile file to be used")
+    @Option(help: "The target in your Podfile or Package.swift file to be used")
     var target: String
 
-    @Argument(help: "Path to the directory where Podfile.lock is located")
+    @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
     var directoryPath: String = "."
 
     func run() throws {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
+        // Check when this contains a Package.swift or a Podfile
+        if FileManager.default.fileExists(atPath:  directoryURL.appendingPathComponent("Package.swift").path) {
+            try processPackage(at: directoryURL)
+        } else {
+            try processPodfile(at: directoryURL)
+        }
+    }
+    
+    func processPackage(at directoryURL: URL) throws {
+        
+        let packageRaw = try shell("swift package describe --type json", at: directoryURL)
+        let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
+        let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+        
+        let current = CompareStatsOutput(label: "Current", graph: graph)
+        
+        let outputs = try [current] + gitObjects.compactMap {
+            guard let package = try? shell("git show \($0):Package.swift", at: directoryURL), !package.isEmpty  else {
+                return nil
+            }
+            _ = try shell("git show \($0):Package.swift > Package.swift.new", at: directoryURL)
+            _ = try shell("mv Package.swift Package.swift.current", at: directoryURL)
+            _ = try shell("mv Package.swift.new Package.swift", at: directoryURL)
+            guard
+                let packageRaw = try? shell("swift package describe --type json", at: directoryURL),
+                !packageRaw.isEmpty,
+                let (dependencies, targetDependencies) = try? extracPackageModules(from: packageRaw, target: target)
 
+            else {
+                try shell("mv Package.swift.current Package.swift", at: directoryURL)
+                return nil
+            }
+
+            let current = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+            try shell("mv Package.swift.current Package.swift", at: directoryURL)
+            return CompareStatsOutput(label: $0, graph: current)
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        let jsonData = try encoder.encode(outputs)
+        let jsonString = String(data: jsonData, encoding: .utf8)!
+        print(jsonString)
+    }
+    
+    func processPodfile(at directoryURL: URL) throws {
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
 
