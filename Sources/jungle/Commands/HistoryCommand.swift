@@ -57,13 +57,20 @@ struct HistoryCommand: AsyncParsableCommand {
         let current = try await GitLogEntry.current.process(pod: pod, podfile: String(contentsOf: podfileURL), target: currentTargetDependencies)
 
         // process Podfile.lock for past commits
-        let output = try await withThrowingTaskGroup(of: HistoryStatsOutput.self, returning: [HistoryStatsOutput].self) { group in
+
+        let output = await withTaskGroup(of: HistoryStatsOutput?.self, returning: [HistoryStatsOutput].self) { group in
 
             for entry in logs.lazy {
                 group.addTask {
-                    let podfile = try shell("git show \(entry.revision):Podfile", at: directoryURL)
-                    let entryTargetDependencies = try moduleFromPodfile(podfile, on: target) ?? .init(name: target, dependencies: [])
-                    return try await entry.process(
+                    
+                    guard
+                        let podfile = try? shell("git show \(entry.revision):Podfile", at: directoryURL),
+                        let entryTargetDependencies = try? moduleFromPodfile(podfile, on: target) ?? .init(name: target, dependencies: [])
+                    else {
+                        return nil
+                    }
+
+                    return try? await entry.process(
                         pod: pod,
                         podfile: shell("git show \(entry.revision):Podfile.lock", at: directoryURL),
                         target: entryTargetDependencies
@@ -72,7 +79,7 @@ struct HistoryCommand: AsyncParsableCommand {
             }
 
             var rows: [HistoryStatsOutput] = []
-            for try await row in group {
+            for await row in group.compactMap({ $0 }) {
                 rows.append(row)
             }
             return rows
