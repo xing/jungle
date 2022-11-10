@@ -31,10 +31,10 @@ struct HistoryStatsOutput: Codable {
     }
 }
 
-struct CompareStatsOutput: Codable {
-    let name: String
-    let moduleCount: Int
-    let complexity: Int
+public struct CompareStatsOutput: Codable {
+    public let name: String
+    public let moduleCount: Int
+    public let complexity: Int
     
     init(label: String, graph: Graph) {
         name = label

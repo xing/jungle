@@ -53,14 +53,10 @@ struct CompareCommand: ParsableCommand {
     }
     
     func processPackage(at directoryURL: URL) throws {
-        
-        let packageRaw = try shell("swift package describe --type json", at: directoryURL)
-        let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)        
-        let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
-        let current = CompareStatsOutput(label: "Current", graph: graph)
-        
+
+        let current = try process(target: target, directoryURL: directoryURL)
         let outputs = try [current] + gitObjects.compactMap {
-            try process(label: $0, target: target, directoryURL: directoryURL, dependencies: dependencies, targetDependencies: targetDependencies)
+            try process(label: $0, target: target, directoryURL: directoryURL)
         }
 
         let encoder = JSONEncoder()
@@ -69,10 +65,7 @@ struct CompareCommand: ParsableCommand {
         let jsonString = String(data: jsonData, encoding: .utf8)!
         print(jsonString)
     }
-    
 
-    
-    
     func processPodfile(at directoryURL: URL) throws {
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
@@ -112,7 +105,15 @@ struct CompareCommand: ParsableCommand {
     }
 }
 
-func process(label: String, target: String, directoryURL: URL, dependencies: [Module], targetDependencies: [String]) throws -> CompareStatsOutput? {
+public func process(target: String, directoryURL: URL) throws -> CompareStatsOutput? {
+    let packageRaw = try shell("swift package describe --type json", at: directoryURL)
+    let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
+    let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+    let current = CompareStatsOutput(label: "Current", graph: graph)
+    return current
+}
+    
+public func process(label: String, target: String, directoryURL: URL) throws -> CompareStatsOutput? {
     guard let package = try? shell("git show \(label):Package.swift", at: directoryURL), !package.isEmpty  else {
         return nil
     }
@@ -133,7 +134,7 @@ func process(label: String, target: String, directoryURL: URL, dependencies: [Mo
     return CompareStatsOutput(label: label, graph: current)
 }
 
-func process(label: String, pod: String?, podfile: String, target: Module) throws -> CompareStatsOutput {
+public func process(label: String, pod: String?, podfile: String, target: Module) throws -> CompareStatsOutput {
     let dependencies = try extractModulesFromPodfileLock(podfile)
     
     let graph: Graph
