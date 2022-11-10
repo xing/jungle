@@ -26,6 +26,10 @@ public enum TargetError: Error {
     case targetNotFound(target: String)
 }
 
+public enum PackageError: Error {
+    case nonDecodable(raw: String)
+}
+
 extension TargetError: CustomStringConvertible {
     public var description: String {
         switch self {
@@ -36,7 +40,14 @@ extension TargetError: CustomStringConvertible {
 }
 
 public func extracPackageModules(from packageRaw: String, target: String) throws -> ([Module], [String]) {
-    let package = try JSONDecoder().decode(Package.self, from: packageRaw.data(using: .utf8)!)
+    
+    guard
+        let data = packageRaw.data(using: .utf8)
+    else {
+        throw PackageError.nonDecodable(raw: packageRaw)
+    }
+    
+    let package = try JSONDecoder().decode(Package.self, from: data)
     
     guard let targetModules = package.targets.filter({ $0.name == target }).first else {
         throw TargetError.targetNotFound(target: target)

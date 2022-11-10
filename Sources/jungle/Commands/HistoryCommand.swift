@@ -61,12 +61,12 @@ struct HistoryCommand: AsyncParsableCommand {
         var previous: [HistoryStatsOutput] = []
         
         for entry in logs {
-            if let result = try await process(entry: entry, target: target, directoryURL: directoryURL) {
+            if let result = try? await process(entry: entry, target: target, directoryURL: directoryURL) {
                 previous.append(result)
             }
         }
         
-        let output = [first] + previous
+        let output = previous + [first]
 
         switch outputFormat {
         case .json:

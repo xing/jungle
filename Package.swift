@@ -14,7 +14,7 @@ let package = Package(
         .library(name: "Shell", targets: ["Shell"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.3"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.1")
     ],
     targets: [
