@@ -32,8 +32,8 @@ struct CompareCommand: ParsableCommand {
     )
     var gitObjects: [String] = ["HEAD", "main", "master"]
 
-    @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
-    var pod: String?
+    @Option(help: "The Module to compare. If you specify something, target parameter will be ommited")
+    var module: String?
     
     @Option(help: "The target in your Podfile or Package.swift file to be used")
     var target: String
@@ -76,7 +76,7 @@ struct CompareCommand: ParsableCommand {
 
         let current = try process(
             label: "Current",
-            pod: pod,
+            pod: module,
             podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock")),
             target: currentTargetDependencies
         )
@@ -91,7 +91,7 @@ struct CompareCommand: ParsableCommand {
             
             return try? process(
                 label: $0,
-                pod: pod,
+                pod: module,
                 podfile: shell("git show \($0):Podfile.lock", at: directoryURL),
                 target: entryTargetDependencies
             )
