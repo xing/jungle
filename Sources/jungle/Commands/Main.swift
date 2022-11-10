@@ -5,7 +5,7 @@ struct Jungle: AsyncParsableCommand {
     static var configuration = CommandConfiguration(
         commandName: "jungle",
         abstract: "Displays dependency statistics",
-        version: "1.0.2",
+        version: "1.0.3",
         subcommands: [HistoryCommand.self, CompareCommand.self, GraphCommand.self],
         defaultSubcommand: CompareCommand.self
     )
