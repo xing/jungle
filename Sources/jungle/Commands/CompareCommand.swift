@@ -55,31 +55,12 @@ struct CompareCommand: ParsableCommand {
     func processPackage(at directoryURL: URL) throws {
         
         let packageRaw = try shell("swift package describe --type json", at: directoryURL)
-        let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
+        let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)        
         let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
-        
         let current = CompareStatsOutput(label: "Current", graph: graph)
         
         let outputs = try [current] + gitObjects.compactMap {
-            guard let package = try? shell("git show \($0):Package.swift", at: directoryURL), !package.isEmpty  else {
-                return nil
-            }
-            _ = try shell("git show \($0):Package.swift > Package.swift.new", at: directoryURL)
-            _ = try shell("mv Package.swift Package.swift.current", at: directoryURL)
-            _ = try shell("mv Package.swift.new Package.swift", at: directoryURL)
-            guard
-                let packageRaw = try? shell("swift package describe --type json", at: directoryURL),
-                !packageRaw.isEmpty,
-                let (dependencies, targetDependencies) = try? extracPackageModules(from: packageRaw, target: target)
-
-            else {
-                try shell("mv Package.swift.current Package.swift", at: directoryURL)
-                return nil
-            }
-
-            let current = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
-            try shell("mv Package.swift.current Package.swift", at: directoryURL)
-            return CompareStatsOutput(label: $0, graph: current)
+            try process(label: $0, target: target, directoryURL: directoryURL, dependencies: dependencies, targetDependencies: targetDependencies)
         }
 
         let encoder = JSONEncoder()
@@ -88,6 +69,9 @@ struct CompareCommand: ParsableCommand {
         let jsonString = String(data: jsonData, encoding: .utf8)!
         print(jsonString)
     }
+    
+
+    
     
     func processPodfile(at directoryURL: URL) throws {
         // Choose the target to analyze
@@ -126,6 +110,27 @@ struct CompareCommand: ParsableCommand {
         let jsonString = String(data: jsonData, encoding: .utf8)!
         print(jsonString)
     }
+}
+
+func process(label: String, target: String, directoryURL: URL, dependencies: [Module], targetDependencies: [String]) throws -> CompareStatsOutput? {
+    guard let package = try? shell("git show \(label):Package.swift", at: directoryURL), !package.isEmpty  else {
+        return nil
+    }
+    try shell("git show \(label):Package.swift > Package.swift.new", at: directoryURL)
+    try shell("mv Package.swift Package.swift.current", at: directoryURL)
+    try shell("mv Package.swift.new Package.swift", at: directoryURL)
+    guard
+        let packageRaw = try? shell("swift package describe --type json", at: directoryURL),
+        !packageRaw.isEmpty,
+        let (dependencies, targetDependencies) = try? extracPackageModules(from: packageRaw, target: target)
+
+    else {
+        try shell("mv Package.swift.current Package.swift", at: directoryURL)
+        return nil
+    }
+    let current = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+    _ = try shell("mv Package.swift.current Package.swift", at: directoryURL)
+    return CompareStatsOutput(label: label, graph: current)
 }
 
 func process(label: String, pod: String?, podfile: String, target: Module) throws -> CompareStatsOutput {

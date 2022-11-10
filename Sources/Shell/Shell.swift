@@ -1,6 +1,6 @@
 import Foundation
 
-public func shell(_ command: String, at currentDirectoryURL: URL? = nil) throws -> String {
+@discardableResult public func shell(_ command: String, at currentDirectoryURL: URL? = nil) throws -> String {
     let task = Process()
     let pipe = Pipe()
 
