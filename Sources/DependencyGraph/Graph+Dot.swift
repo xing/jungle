@@ -10,11 +10,11 @@ public extension Graph {
         return "\(header(usingUniqueEdges: false)) \(edges) \(footer)"
     }
 
-    var multiEdgeStats: String {
+    private var multiEdgeStats: String {
         "nodes: \(nodes.count), edges: \(multiEdges.count), complexity: \(multiGraphComplexity)"
     }
     
-    var uniqueEdgeStats: String {
+    private var uniqueEdgeStats: String {
         "nodes: \(nodes.count), edges: \(uniqueEdges.count), complexity: \(regularGraphComplexity)"
     }
     

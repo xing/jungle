@@ -36,9 +36,9 @@ public struct CompareStatsOutput: Codable {
     public let moduleCount: Int
     public let complexity: Int
     
-    init(label: String, graph: Graph) {
+    init(label: String, graph: Graph, usingMultiEdge: Bool) {
         name = label
         moduleCount = graph.nodes.count
-        complexity = graph.multiGraphComplexity
+        complexity = usingMultiEdge ? graph.multiGraphComplexity : graph.regularGraphComplexity
     }
 }

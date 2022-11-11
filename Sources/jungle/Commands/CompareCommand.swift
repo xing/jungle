@@ -38,6 +38,9 @@ struct CompareCommand: ParsableCommand {
     @Option(help: "The target in your Podfile or Package.swift file to be used")
     var target: String
 
+    @Flag(help: "Use multi-edge or unique-edge configuration")
+    var useMultiedge: Bool = false
+    
     @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
     var directoryPath: String = "."
 
@@ -54,9 +57,9 @@ struct CompareCommand: ParsableCommand {
     
     func processPackage(at directoryURL: URL) throws {
 
-        let current = try process(target: target, directoryURL: directoryURL)
+        let current = try process(target: target, directoryURL: directoryURL, usingMultiEdge: useMultiedge)
         let outputs = try [current] + gitObjects.compactMap {
-            try process(label: $0, target: target, directoryURL: directoryURL)
+            try process(label: $0, target: target, directoryURL: directoryURL, usingMultiEdge: useMultiedge)
         }
 
         let encoder = JSONEncoder()
@@ -78,10 +81,12 @@ struct CompareCommand: ParsableCommand {
             label: "Current",
             pod: module,
             podfile: String(contentsOf: directoryURL.appendingPathComponent("Podfile.lock")),
-            target: currentTargetDependencies
+            target: currentTargetDependencies,
+            usingMultiEdge: useMultiedge
         )
 
         let outputs = [current] + gitObjects.compactMap {
+     
             guard
                 let podfile = try? shell("git show \($0):Podfile", at: directoryURL),
                 let entryTargetDependencies = try? moduleFromPodfile(podfile, on: target)
@@ -93,7 +98,8 @@ struct CompareCommand: ParsableCommand {
                 label: $0,
                 pod: module,
                 podfile: shell("git show \($0):Podfile.lock", at: directoryURL),
-                target: entryTargetDependencies
+                target: entryTargetDependencies,
+                usingMultiEdge: useMultiedge
             )
         }
         
@@ -105,15 +111,15 @@ struct CompareCommand: ParsableCommand {
     }
 }
 
-public func process(target: String, directoryURL: URL) throws -> CompareStatsOutput? {
+public func process(target: String, directoryURL: URL, usingMultiEdge: Bool) throws -> CompareStatsOutput? {
     let packageRaw = try shell("swift package describe --type json", at: directoryURL)
     let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
     let graph = try Graph.make(rootTargetName: target, modules: dependencies, targetDependencies: targetDependencies)
-    let current = CompareStatsOutput(label: "Current", graph: graph)
+    let current = CompareStatsOutput(label: "Current", graph: graph, usingMultiEdge: usingMultiEdge)
     return current
 }
     
-public func process(label: String, target: String, directoryURL: URL) throws -> CompareStatsOutput? {
+public func process(label: String, target: String, directoryURL: URL, usingMultiEdge: Bool) throws -> CompareStatsOutput? {
     guard let package = try? shell("git show \(label):Package.swift", at: directoryURL), !package.isEmpty  else {
         return nil
     }
@@ -131,10 +137,10 @@ public func process(label: String, target: String, directoryURL: URL) throws -> 
     }
     let current = try Graph.make(rootTargetName: target, modules: dependencies, targetDependencies: targetDependencies)
     _ = try shell("mv Package.swift.current Package.swift", at: directoryURL)
-    return CompareStatsOutput(label: label, graph: current)
+    return CompareStatsOutput(label: label, graph: current, usingMultiEdge: usingMultiEdge)
 }
 
-public func process(label: String, pod: String?, podfile: String, target: Module) throws -> CompareStatsOutput {
+public func process(label: String, pod: String?, podfile: String, target: Module, usingMultiEdge: Bool) throws -> CompareStatsOutput {
     let dependencies = try extractModulesFromPodfileLock(podfile)
     
     let graph: Graph
@@ -143,6 +149,6 @@ public func process(label: String, pod: String?, podfile: String, target: Module
     } else {
         graph = try Graph.make(rootTargetName: target.name, modules: dependencies, targetDependencies: target.dependencies)
     }
-        
-    return CompareStatsOutput(label: label, graph: graph)
+
+    return CompareStatsOutput(label: label, graph: graph, usingMultiEdge: usingMultiEdge)
 }

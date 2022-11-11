@@ -3,9 +3,13 @@ import Foundation
 @discardableResult public func shell(_ command: String, at directory: URL? = nil, skipErrorsOutput: Bool = true) throws -> String {
     let task = Process()
     let pipe = Pipe()
+    
+    let errorPipe = Pipe()
 
     if !skipErrorsOutput {
         task.standardError = pipe
+    } else {
+        task.standardError = errorPipe
     }
     task.standardOutput = pipe
     task.arguments = ["--login", "-c", command]
