@@ -19,6 +19,7 @@ You can read more information about dependency complexity in our Technical artic
 - [Usage](#usage)
   * [Fetch Historic Complexities](#fetch-historic-complexities)
   * [Compare Complexity Graphs](#compare-complexity-graphs)
+  * [Count Module Dependencies](#count-module-dependencies)
   * [Visualize Complexity Graphs](#visualize-complexity-graphs)
     + [Some tips](#some-tips)
 - [Contributing](#contributing)
@@ -112,6 +113,36 @@ jungle compare --target App ProjectDirectory/ --to main
     "moduleCount" : 124
   }
 ]
+```
+
+### Count Module Dependencies
+
+```shell
+OVERVIEW: Outputs a sorted list of modules dependencies count of your project
+
+USAGE: jungle modules --target <target> [<directory-path>]
+
+ARGUMENTS:
+  <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
+
+OPTIONS:
+  --target <target>       The target in your Podfile or Package.swift file to be used
+  --version               Show the version.
+  -h, --help              Show help information.
+
+```
+
+Example:
+
+```shell
+jungle modules --target jungle
+
+4 - PodExtractor
+3 - SPMExtractor
+2 - DependencyGraph
+0 - Shell
+0 - ArgumentParser
+
 ```
 
 ### Visualize Complexity Graphs
