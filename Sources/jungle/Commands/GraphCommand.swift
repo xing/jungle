@@ -46,11 +46,8 @@ struct GraphCommand: ParsableCommand {
     }
     func processPackage(at directoryURL: URL) throws {
         let packageRaw = try shell("swift package describe --type json", at: directoryURL)
-        
-        let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
-        
-        let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
-        
+        let (modules, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
+        let graph = try Graph.make(rootTargetName: target, modules: modules, targetDependencies: targetDependencies)
         print(useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT)
     }
 
@@ -95,7 +92,7 @@ struct GraphCommand: ParsableCommand {
         if let module = module {
             graph = try Graph.makeForModule(name: module, dependencies: dependencies)
         } else {
-            graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
+            graph = try Graph.make(rootTargetName: target.name, modules: dependencies, targetDependencies: target.dependencies)
         }
         
         return useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT

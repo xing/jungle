@@ -108,7 +108,7 @@ struct CompareCommand: ParsableCommand {
 public func process(target: String, directoryURL: URL) throws -> CompareStatsOutput? {
     let packageRaw = try shell("swift package describe --type json", at: directoryURL)
     let (dependencies, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
-    let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+    let graph = try Graph.make(rootTargetName: target, modules: dependencies, targetDependencies: targetDependencies)
     let current = CompareStatsOutput(label: "Current", graph: graph)
     return current
 }
@@ -129,7 +129,7 @@ public func process(label: String, target: String, directoryURL: URL) throws -> 
         try shell("mv Package.swift.current Package.swift", at: directoryURL)
         return nil
     }
-    let current = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+    let current = try Graph.make(rootTargetName: target, modules: dependencies, targetDependencies: targetDependencies)
     _ = try shell("mv Package.swift.current Package.swift", at: directoryURL)
     return CompareStatsOutput(label: label, graph: current)
 }
@@ -141,7 +141,7 @@ public func process(label: String, pod: String?, podfile: String, target: Module
     if let pod = pod {
         graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
     } else {
-        graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
+        graph = try Graph.make(rootTargetName: target.name, modules: dependencies, targetDependencies: target.dependencies)
     }
         
     return CompareStatsOutput(label: label, graph: graph)

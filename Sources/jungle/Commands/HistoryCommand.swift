@@ -173,7 +173,7 @@ extension GitLogEntry {
         if let pod = pod {
             graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
         } else {
-            graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
+            graph = try Graph.make(rootTargetName: target.name, modules: dependencies, targetDependencies: target.dependencies)
         }
         
         return HistoryStatsOutput(entry: self, graph: graph)
@@ -181,7 +181,7 @@ extension GitLogEntry {
     
     func process(package: String, target: String) async throws -> HistoryStatsOutput {
         let (dependencies, targetDependencies) = try extracPackageModules(from: package, target: target)
-        let graph = try Graph.make(rootTargetName: target, dependencies: dependencies, targetDependencies: targetDependencies)
+        let graph = try Graph.make(rootTargetName: target, modules: dependencies, targetDependencies: targetDependencies)
         return HistoryStatsOutput(entry: self, graph: graph)
     }
 }

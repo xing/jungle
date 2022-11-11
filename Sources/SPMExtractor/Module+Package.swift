@@ -46,7 +46,7 @@ public func extracPackageModules(from packageRaw: String, target: String) throws
     else {
         throw PackageError.nonDecodable(raw: packageRaw)
     }
-    
+
     let package = try JSONDecoder().decode(Package.self, from: data)
     
     guard let targetModules = package.targets.filter({ $0.name == target }).first else {
