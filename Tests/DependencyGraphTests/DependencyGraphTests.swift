@@ -43,4 +43,22 @@ final class DependencyGraphTests: XCTestCase {
         XCTAssertEqual(graph.regularGraphComplexity, 2)
         XCTAssertEqual(graph.multiGraphComplexity, 6)
     }
+
+    func test_emptyGraph_return_zeroModules() throws {
+        // Given
+        let module = Module(name: "A", dependencies: [])
+        let graph = try Graph.makeForModule(name: "A", dependencies: [module])
+        
+        // Then
+        XCTAssertEqual(graph.nodes.count, 1)
+    }
+
+    func test_nonEmptyGraph_return_modules() throws {
+        // Given
+        let module = Module(name: "A", dependencies: ["B"])
+        let graph = try Graph.makeForModule(name: "A", dependencies: [module])
+        
+        // Then
+        XCTAssertEqual(graph.nodes.count, 2)
+    }
 }

@@ -22,8 +22,11 @@ public extension Graph {
         guard lookup.keys.contains(name) else { throw GraphError.moduleNotFound }
         
         let edges = collectEdges(rootDependencyName: name, lookup: lookup)
-        let nodes = edges.flatMap {
+        var nodes = edges.flatMap {
             [Graph.Node(name: $0.source), Graph.Node(name: $0.target)]
+        }
+        if nodes.isEmpty {
+            nodes.append(.init(name: name))
         }
 
         return .init(nodes: Set(nodes), multiEdges: edges)
