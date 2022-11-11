@@ -4,6 +4,7 @@ import Shell
 import PodExtractor
 import DependencyGraph
 import SPMExtractor
+import DependencyModule
 
 struct ModulesCommand: ParsableCommand {
 
@@ -32,22 +33,9 @@ struct ModulesCommand: ParsableCommand {
 
     private func processPackage(at directoryURL: URL) throws {
         let packageRaw = try shell("swift package describe --type json", at: directoryURL)
-        let (modules, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
-        
-        let modulesStats: [ModuleStats] = targetDependencies
-            .compactMap {
-                guard let graph = try? Graph.makeForModule(name: $0, dependencies: modules) else { return nil }
-                return ModuleStats(name: "\($0)", numberOfDependencies: graph.nodes.count)
-            }
-            .sorted { $0.numberOfDependencies > $1.numberOfDependencies }
+        let (allModules, realTargetDependencies) = try extracPackageModules(from: packageRaw, target: target)
 
-        let result = modulesStats
-            .map { "\($0.numberOfDependencies) - \($0.name)" }
-            .joined(separator: "\n")
-
-        print(
-            result
-        )
+        processOutput(realTargetDependencies: realTargetDependencies, allModules: allModules)
     }
 
     private func processPodfile(at directoryURL: URL) throws {
@@ -63,10 +51,14 @@ struct ModulesCommand: ParsableCommand {
         let allPodfileModules = try extractModulesFromPodfileLock(podfileLock)
         let realTargetDependencies = allPodfileModules.filter { targetDependencies.contains($0.name) }
 
+        processOutput(realTargetDependencies: realTargetDependencies.map { $0.name }, allModules: allPodfileModules)
+    }
+    
+    private func processOutput(realTargetDependencies: [String], allModules: [Module]) {
         let modulesStats: [ModuleStats] = realTargetDependencies
             .compactMap {
-                guard let graph = try? Graph.makeForModule(name: $0.name, dependencies: allPodfileModules) else { return nil }
-                return ModuleStats(name: $0.name, numberOfDependencies: graph.nodes.count)
+                guard let graph = try? Graph.makeForModule(name: $0, dependencies: allModules) else { return nil }
+                return ModuleStats(name: $0, numberOfDependencies: graph.nodes.count - 1)
             }
             .sorted { $0.numberOfDependencies > $1.numberOfDependencies }
 
