@@ -83,7 +83,7 @@ public func modulesFromJSONPodfile(_ contents: String) throws -> [Module] {
     return targetsRaw.flatMap(\.asTarget)
 }
 
-public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module] {
+public func extractModulesFromPodfileLock(_ contents: String, excludeExternals: Bool = true) throws -> [Module] {
     // parse YAML to JSON
     guard let yaml = try? Yams.load(yaml: contents) else {
         throw PodError.yamlParsingFailed
@@ -99,9 +99,9 @@ public func extractModulesFromPodfileLock(_ contents: String) throws -> [Module]
     // parse JSON "SPEC REPOS" to [String]
     let externalsDictionary = podsDictionary["SPEC REPOS"] as? [AnyHashable: Any]
 
-    let externals = externalsDictionary?.values
+    let externals = excludeExternals ? externalsDictionary?.values
         .compactMap { $0 as? [String] }
-        .flatMap { $0 } ?? []
+        .flatMap { $0 } ?? [] : []
 
     let pods = try rawPods.map(extractPodFromJSON)
 

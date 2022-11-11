@@ -35,7 +35,7 @@ final class GitLogEntryTests: XCTestCase {
         
         let target: Module = .init(name: "T", dependencies: ["A", "C"])
         
-        let row = try await entry.process(pod: nil, podfile: podfile, target: target).csv
+        let row = try await entry.process(pod: nil, podfile: podfile, target: target, usingMultiEdge: true).csv
         XCTAssertEqual(row.description, "2022-07-09T21:29:20+02:00;abbd80e;4;1;Shammi Didla;restructure . something")
     }
 }

@@ -9,4 +9,3 @@ public struct Module: Hashable {
         self.dependencies = dependencies
     }
 }
-

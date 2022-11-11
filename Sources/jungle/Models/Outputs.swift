@@ -10,11 +10,11 @@ struct HistoryStatsOutput: Codable {
     let author: String?
     let message: String?
     
-    init(entry: GitLogEntry, graph: Graph) {
+    init(entry: GitLogEntry, graph: Graph, usingMultiEdge: Bool) {
         timestamp = entry.timestamp
         revision = entry.revision
         moduleCount = graph.nodes.count
-        complexity = graph.multiGraphComplexity
+        complexity = usingMultiEdge ? graph.multiGraphComplexity : graph.regularGraphComplexity
         author = entry.author
         message = entry.message
     }
@@ -31,14 +31,14 @@ struct HistoryStatsOutput: Codable {
     }
 }
 
-struct CompareStatsOutput: Codable {
-    let name: String
-    let moduleCount: Int
-    let complexity: Int
+public struct CompareStatsOutput: Codable {
+    public let name: String
+    public let moduleCount: Int
+    public let complexity: Int
     
-    init(label: String, graph: Graph) {
+    init(label: String, graph: Graph, usingMultiEdge: Bool) {
         name = label
         moduleCount = graph.nodes.count
-        complexity = graph.multiGraphComplexity
+        complexity = usingMultiEdge ? graph.multiGraphComplexity : graph.regularGraphComplexity
     }
 }

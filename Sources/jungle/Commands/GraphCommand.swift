@@ -4,6 +4,7 @@ import DependencyGraph
 import PodExtractor
 import DependencyModule
 import Shell
+import SPMExtractor
 
 struct GraphCommand: ParsableCommand {
     static var configuration = CommandConfiguration(
@@ -17,18 +18,40 @@ struct GraphCommand: ParsableCommand {
     )
     var gitObject: String?
 
-    @Option(help: "The Pod to compare. If you specify something, target parameter will be ommited")
-    var pod: String?
+    @Option(help: "The Module to compare. If you specify something, target parameter will be ommited")
+    var module: String?
 
-    @Option(help: "The target in your Podfile file to be used")
+    @Option(help: "The target in your Podfile or Package.swift file to be used")
     var target: String
     
-    @Argument(help: "Path to the directory where Podfile.lock is located")
+    @Flag(help: "Use multi-edge or unique-edge configuration")
+    var useMultiedge: Bool = false
+    
+    @Flag(help: "Show Externals modules dependencies")
+    var showExternals: Bool = false
+    
+    @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
     var directoryPath: String = "."
 
     func run() throws {
         let directoryPath = (directoryPath as NSString).expandingTildeInPath
         let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
+        
+        // Check when this contains a Package.swift or a Podfile
+        if FileManager.default.fileExists(atPath: directoryURL.appendingPathComponent("Package.swift").path) {
+            try processPackage(at: directoryURL)
+        } else {
+            try processPodfile(at: directoryURL)
+        }
+    }
+    func processPackage(at directoryURL: URL) throws {
+        let packageRaw = try shell("swift package describe --type json", at: directoryURL)
+        let (modules, targetDependencies) = try extracPackageModules(from: packageRaw, target: target)
+        let graph = try Graph.make(rootTargetName: target, modules: modules, targetDependencies: targetDependencies)
+        print(useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT)
+    }
+
+    func processPodfile(at directoryURL: URL) throws {
         if let gitObject = gitObject {
             guard
                 let podfile = try? shell("git show \(gitObject):Podfile", at: directoryURL),
@@ -63,15 +86,15 @@ struct GraphCommand: ParsableCommand {
     }
     
     private func makeDOT(podfile: String, label: String, target: Module) throws -> String {
-        let dependencies = try extractModulesFromPodfileLock(podfile)
+        let dependencies = try extractModulesFromPodfileLock(podfile, excludeExternals: !showExternals)
         
         let graph: Graph
-        if let pod = pod {
-            graph = try Graph.makeForModule(name: pod, dependencies: dependencies)
+        if let module = module {
+            graph = try Graph.makeForModule(name: module, dependencies: dependencies)
         } else {
-            graph = try Graph.make(rootTargetName: target.name, dependencies: dependencies, targetDependencies: target.dependencies)
+            graph = try Graph.make(rootTargetName: target.name, modules: dependencies, targetDependencies: target.dependencies)
         }
         
-        return graph.multiEdgeDOT
+        return useMultiedge ? graph.multiEdgeDOT : graph.uniqueEdgeDOT
     }
 }

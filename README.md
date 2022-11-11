@@ -2,11 +2,12 @@
 
 [![Swift](https://github.com/xing/jungle/actions/workflows/swift.yml/badge.svg)](https://github.com/xing/jungle/actions/workflows/swift.yml)
 
-A Swift command line tool to extract dependency information from a CocoaPods-based Xcode project. Currently, that´s what you can do:
+A Swift CLI tool that generates complexity metrics information from a Cocoapods Xcode project or a SwiftPM package. Currently, that´s what you can do:
 - Dependency graph (dot format)
 - Cyclomatic complexity evaluation 
 - Number of dependant modules
-- Compare stats between different branches or even through the git history
+- Compare stats between different branches
+- Show stats along the git history
 
 You can read more information about dependency complexity in our Technical article ["How to control your dependencies"](https://tech.xing.com/how-to-control-your-ios-dependencies-7690cc7b1c40).
 
@@ -48,14 +49,14 @@ swift build -c release
 ```shell
 OVERVIEW: Displays historic complexity of the dependency graph
 
-USAGE: jungle history [--since <since>] [--pod <pod>] --target <target> [--output-format <output-format>] [<directory-path>]
+USAGE: jungle history [--since <since>] [--module <module>] --target <target> [--output-format <output-format>] [<directory-path>]
 
 ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock is located (default: .)
 
 OPTIONS:
   --since <since>         Equivalent to git-log --since: Eg: '6 months ago' (default: 6 months ago)
-  --pod <pod>             The Pod to generate a report for. Specifying a pod disregards the target parameter
+  --module <module>       The Module to compare. If you specify something, target parameter will be ommited
   --target <target>       The target in your Podfile file to be used
   --output-format <output-format>
                           csv or json (default: csv)
@@ -79,15 +80,15 @@ Now;Current;124;21063;;
 ```shell
 OVERVIEW: Compares the current complexity of the dependency graph to others versions in git
 
-USAGE: jungle compare [--to <git-object> ...] [--pod <pod>] --target <target> [<directory-path>]
+USAGE: jungle compare [--to <git-object> ...] [--module <module>] --target <target> [<directory-path>]
 
 ARGUMENTS:
-  <directory-path>        Path to the directory where Podfile.lock is located (default: .)
+  <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
 
 OPTIONS:
-  --to <git-object>       The git objects to compare the current graph to. Eg: - 'main', 'my_branch', 'some_commit_hash'. (default: HEAD, main)
-  --pod <pod>             The Pod to compare. Specifying a pod disregards the target parameter
-  --target <target>       The target in your Podfile file to be used
+  --to <git-object>       The git objects to compare the current graph to. Eg: - 'main', 'my_branch', 'some_commit_hash'. (default: HEAD, main, master)
+  --module <module>       The Module to compare. If you specify something, target parameter will be ommited
+  --target <target>       The target in your Podfile or Package.swift file to be used
   --version               Show the version.
   -h, --help              Show help information.
 ```
@@ -118,17 +119,19 @@ jungle compare --target App ProjectDirectory/ --to main
 ```shell
 OVERVIEW: Outputs the dependency graph in DOT format
 
-USAGE: jungle graph [--of <git-object>] [--pod <pod>] --target <target> [<directory-path>]
+USAGE: jungle graph [--of <git-object>] [--module <module>] --target <target> [--use-multiedge] [--show-externals] [<directory-path>]
 
 ARGUMENTS:
-  <directory-path>        Path to the directory where Podfile.lock is located (default: .)
+  <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
 
 OPTIONS:
   --of <git-object>       A git object representing the version to draw the graph for. Eg: - 'main', 'my_branch', 'some_commit_hash'.
-  --pod <pod>             The Pod to compare. Specifying a pod disregards the target parameter
-  --target <target>       The target in your Podfile file to be used
+  --module <module>       The Module to compare. If you specify something, target parameter will be ommited
+  --target <target>       The target in your Podfile or Package.swift file to be used
+  --use-multiedge         Use multi-edge or unique-edge configuration
+  --show-externals        Show Externals modules dependencies
   --version               Show the version.
-  -h, --help              Show help information
+  -h, --help              Show help information.
 
 ```
 
