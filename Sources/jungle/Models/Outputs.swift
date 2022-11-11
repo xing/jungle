@@ -10,11 +10,11 @@ struct HistoryStatsOutput: Codable {
     let author: String?
     let message: String?
     
-    init(entry: GitLogEntry, graph: Graph) {
+    init(entry: GitLogEntry, graph: Graph, usingMultiEdge: Bool) {
         timestamp = entry.timestamp
         revision = entry.revision
         moduleCount = graph.nodes.count
-        complexity = graph.multiGraphComplexity
+        complexity = usingMultiEdge ? graph.multiGraphComplexity : graph.regularGraphComplexity
         author = entry.author
         message = entry.message
     }

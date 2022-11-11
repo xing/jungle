@@ -27,6 +27,9 @@ struct HistoryCommand: AsyncParsableCommand {
     @Option(help: "The target in your Podfile file to be used")
     var target: String
     
+    @Flag(help: "Use multi-edge or unique-edge configuration")
+    var useMultiedge: Bool = false
+    
     @Option(help: "csv or json")
     var outputFormat: OutputFormat = .csv
 
@@ -48,7 +51,7 @@ struct HistoryCommand: AsyncParsableCommand {
     func processPackage(at directoryURL: URL) async throws {
         let packageRaw = try shell("swift package describe --type json", at: directoryURL)
 
-        let first = try await GitLogEntry.current.process(package: packageRaw, target: target)
+        let first = try await GitLogEntry.current.process(package: packageRaw, target: target, usingMultiEdge: useMultiedge)
 
         let gitLog = "git log --since='\(since)' --first-parent --format='%h;%aI;%an;%s' -- Package.swift"
         let logs = try shell(gitLog, at: directoryURL)
@@ -97,7 +100,7 @@ struct HistoryCommand: AsyncParsableCommand {
   
         try shell("mv Package.swift.current Package.swift", at: directoryURL)
     
-        return try await entry.process(package: packageRaw, target: target)
+        return try await entry.process(package: packageRaw, target: target, usingMultiEdge: useMultiedge)
     }
     func processPodfile(at directoryURL: URL) async throws {
         
@@ -119,7 +122,7 @@ struct HistoryCommand: AsyncParsableCommand {
             .map(GitLogEntry.parse)
 
         // process Podfile.lock in current directory
-        let current = try await GitLogEntry.current.process(pod: module, podfile: String(contentsOf: podfileURL), target: currentTargetDependencies)
+        let current = try await GitLogEntry.current.process(pod: module, podfile: String(contentsOf: podfileURL), target: currentTargetDependencies, usingMultiEdge: useMultiedge)
 
         // process Podfile.lock for past commits
 
@@ -138,7 +141,8 @@ struct HistoryCommand: AsyncParsableCommand {
                     return try? await entry.process(
                         pod: module,
                         podfile: shell("git show \(entry.revision):Podfile.lock", at: directoryURL),
-                        target: entryTargetDependencies
+                        target: entryTargetDependencies,
+                        usingMultiEdge: useMultiedge
                     )
                 }
             }
@@ -166,7 +170,7 @@ struct HistoryCommand: AsyncParsableCommand {
 }
 
 extension GitLogEntry {
-    func process(pod: String?, podfile: String, target: Module) async throws -> HistoryStatsOutput {
+    func process(pod: String?, podfile: String, target: Module, usingMultiEdge: Bool) async throws -> HistoryStatsOutput {
         let dependencies = try extractModulesFromPodfileLock(podfile)
         
         let graph: Graph
@@ -176,12 +180,12 @@ extension GitLogEntry {
             graph = try Graph.make(rootTargetName: target.name, modules: dependencies, targetDependencies: target.dependencies)
         }
         
-        return HistoryStatsOutput(entry: self, graph: graph)
+        return HistoryStatsOutput(entry: self, graph: graph, usingMultiEdge: usingMultiEdge)
     }
     
-    func process(package: String, target: String) async throws -> HistoryStatsOutput {
+    func process(package: String, target: String, usingMultiEdge: Bool) async throws -> HistoryStatsOutput {
         let (dependencies, targetDependencies) = try extracPackageModules(from: package, target: target)
         let graph = try Graph.make(rootTargetName: target, modules: dependencies, targetDependencies: targetDependencies)
-        return HistoryStatsOutput(entry: self, graph: graph)
+        return HistoryStatsOutput(entry: self, graph: graph, usingMultiEdge: usingMultiEdge)
     }
 }

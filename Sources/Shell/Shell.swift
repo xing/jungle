@@ -26,4 +26,3 @@ import Foundation
     
     return output
 }
-
