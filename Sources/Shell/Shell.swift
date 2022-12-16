@@ -12,7 +12,7 @@ import Foundation
         task.standardError = errorPipe
     }
     task.standardOutput = pipe
-    task.arguments = ["--login", "-c", command]
+    task.arguments = ["-c", command]
     task.launchPath = "/bin/zsh"
     task.standardInput = nil
     if let directory = directory {
