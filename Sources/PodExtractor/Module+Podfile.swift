@@ -83,7 +83,7 @@ public func modulesFromJSONPodfile(_ contents: String) throws -> [Module] {
     return targetsRaw.flatMap(\.asTarget)
 }
 
-public func extractModulesFromPodfileLock(_ contents: String, excludeExternals: Bool = true) throws -> [Module] {
+public func extractModulesFromPodfileLock(_ contents: String, excludeExternals: Bool = true, excludeTests: Bool = true) throws -> [Module] {
     // parse YAML to JSON
     guard let yaml = try? Yams.load(yaml: contents) else {
         throw PodError.yamlParsingFailed
@@ -108,7 +108,9 @@ public func extractModulesFromPodfileLock(_ contents: String, excludeExternals: 
     // Exclude Test and External Pods
     let podsWithoutExternalsOrSubspecs = pods
         .filter { !externals.contains($0.name) }
-        .filter { !$0.name.contains("/") } // SubSpecs like Tests and Externals Subspecs
+        .filter {
+            return excludeTests ? !$0.name.contains("/") : true
+        } // SubSpecs like Tests and Externals Subspecs
 
     return podsWithoutExternalsOrSubspecs
 }
@@ -121,9 +123,13 @@ private func extractPodFromJSON(_ json: Any) throws -> Module {
               let name = container.keys.first,
               let dependencies = container.values.first {
 
+        let podComponents = name.components(separatedBy: "/")
+        let podType: Module.ModuleType = podComponents.count > 1 && podComponents[1].contains("Tests") ? .test : .library
+        
         return try .init(
             name: clean(name),
-            dependencies: dependencies.map(clean)
+            dependencies: dependencies.map(clean),
+            type: podType
         )
 
     } else {

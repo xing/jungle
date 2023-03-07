@@ -98,6 +98,23 @@ public func extractDependantTargets(from packageRaw: String, target: String) thr
     return dependantTargets + indirectTargets
 }
 
+public func extractDependantTargets(from modules: [Module], for target: String) throws -> [Module] {
+
+    let dependantTargets: [Module] = modules
+        .filter { $0.dependencies.contains(target) || $0.name.components(separatedBy: "/").count == 2 && $0.name.components(separatedBy: "/").first == target }
+    
+    guard !dependantTargets.isEmpty else {
+        return dependantTargets
+    }
+    
+    var indirectTargets: [Module] = []
+    
+    try dependantTargets.forEach {
+        indirectTargets += try extractDependantTargets(from: modules, for: $0.name)
+    }
+    
+    return dependantTargets + indirectTargets
+}
 
 public func extractDependencies(from package: Package, on target: String) -> [Module] {
     guard

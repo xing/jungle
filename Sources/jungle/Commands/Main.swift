@@ -6,7 +6,7 @@ struct Jungle: AsyncParsableCommand {
         commandName: "jungle",
         abstract: "SwiftPM and Cocoapods based projects complexity analyzer.",
         version: "2.1.1",
-        subcommands: [HistoryCommand.self, CompareCommand.self, GraphCommand.self, ModulesCommand.self],
+        subcommands: [HistoryCommand.self, CompareCommand.self, GraphCommand.self, ModulesCommand.self, DependantCommand.self],
         defaultSubcommand: CompareCommand.self
     )
 }
