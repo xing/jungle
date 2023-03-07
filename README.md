@@ -8,6 +8,7 @@ A Swift CLI tool that generates complexity metrics information from a Cocoapods 
 - Number of dependant modules
 - Compare stats between different branches
 - Show stats along the git history
+- Show dependant targets
 
 You can read more information about dependency complexity in our Technical article ["How to control your dependencies"](https://tech.xing.com/how-to-control-your-ios-dependencies-7690cc7b1c40).
 
@@ -144,6 +145,32 @@ jungle modules --target jungle
 0 - ArgumentParser
 
 ```
+
+### Get dependant modules
+
+```shell
+OVERVIEW: Outputs a sorted list of targets that depends on the specified one in target
+
+USAGE: jungle dependant --target <target> [--show-only-tests] [<directory-path>]
+
+ARGUMENTS:
+  <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
+
+OPTIONS:
+  --target <target>       The target in your Podfile or Package.swift file to be used
+  --show-only-tests       Show only Test targets
+  --version               Show the version.
+  -h, --help              Show help information.
+
+```
+
+Example:
+
+```shell
+jungle dependant --target SamplePackage $HOME/Desktop/SamplePackage
+
+Library, LibraryTests, SamplePackageTests
+
 
 ### Visualize Complexity Graphs
 

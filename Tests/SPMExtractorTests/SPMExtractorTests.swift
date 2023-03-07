@@ -340,4 +340,104 @@ final class SPMExtractorTests: XCTestCase {
 
         XCTAssertThrowsError(try extracPackageModules(from: rawPackage, target: "NonExistentTarget"))
     }
+
+    func testTargetDependantFromTarget() throws {
+        let rawPackage = """
+        {
+          "dependencies" : [
+            {
+              "identity" : "yams",
+              "requirement" : {
+                "range" : [
+                  {
+                    "lower_bound" : "5.0.1",
+                    "upper_bound" : "6.0.0"
+                  }
+                ]
+              },
+              "type" : "sourceControl",
+              "url" : "https://github.com/jpsim/Yams.git"
+            }
+          ],
+          "manifest_display_name" : "SamplePackage",
+          "name" : "SamplePackage",
+          "path" : "/Users/oswaldo.rubio/Desktop/SamplePackage",
+          "platforms" : [
+
+          ],
+          "products" : [
+            {
+              "name" : "SamplePackage",
+              "targets" : [
+                "SamplePackage"
+              ],
+              "type" : {
+                "library" : [
+                  "automatic"
+                ]
+              }
+            }
+          ],
+          "targets" : [
+            {
+              "c99name" : "SamplePackageTests",
+              "module_type" : "SwiftTarget",
+              "name" : "SamplePackageTests",
+              "path" : "Tests/SamplePackageTests",
+              "sources" : [
+                "SamplePackageTests.swift"
+              ],
+              "target_dependencies" : [
+                "SamplePackage"
+              ],
+              "type" : "test"
+            },
+            {
+              "c99name" : "SamplePackage",
+              "module_type" : "SwiftTarget",
+              "name" : "SamplePackage",
+              "path" : "Sources/SamplePackage",
+              "product_memberships" : [
+                "SamplePackage"
+              ],
+              "sources" : [
+                "SamplePackage.swift"
+              ],
+              "type" : "library"
+            },
+            {
+              "c99name" : "LibraryTests",
+              "module_type" : "SwiftTarget",
+              "name" : "LibraryTests",
+              "path" : "Tests/LibraryTests",
+              "sources" : [
+                "File.swift"
+              ],
+              "target_dependencies" : [
+                "Library"
+              ],
+              "type" : "test"
+            },
+            {
+              "c99name" : "Library",
+              "module_type" : "SwiftTarget",
+              "name" : "Library",
+              "path" : "Sources/Library",
+              "sources" : [
+                "File.swift"
+              ],
+              "target_dependencies" : [
+                "SamplePackage"
+              ],
+              "type" : "library"
+            }
+          ],
+          "tools_version" : "5.7"
+        }
+        """
+        
+        
+        let dependant = try extractDependantTargets(from: rawPackage, target: "SamplePackage")
+        XCTAssertEqual(dependant.map(\.name).sorted(), ["Library", "LibraryTests", "SamplePackageTests"])
+    }
 }
