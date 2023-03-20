@@ -117,24 +117,31 @@ public func extractModulesFromPodfileLock(_ contents: String, excludeExternals: 
 
 private func extractPodFromJSON(_ json: Any) throws -> Module {
     if let name = json as? String {
-        return try .init(name: clean(name), dependencies: [])
+        return try .init(name: clean(name), dependencies: [], type: type(name))
 
     } else if let container = json as? [String: [String]],
               let name = container.keys.first,
               let dependencies = container.values.first {
 
-        let podComponents = name.components(separatedBy: "/")
-        let podType: Module.ModuleType = podComponents.count > 1 && podComponents[1].contains("Tests") ? .test : .library
-        
         return try .init(
             name: clean(name),
             dependencies: dependencies.map(clean),
-            type: podType
+            type: type(name)
         )
 
     } else {
         throw PodError.failedParsingPod(json as? String ?? "")
     }
+}
+
+private func type(_ name: String) -> Module.ModuleType {
+    let podComponents = name.components(separatedBy: "/")
+    
+    guard podComponents.count > 1 else {
+        return .library
+    }
+    
+    return podComponents[1].contains("Tests") ? .test : .library
 }
 
 private func clean(_ name: String) throws -> String {
