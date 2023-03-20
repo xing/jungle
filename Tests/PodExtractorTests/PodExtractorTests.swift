@@ -28,6 +28,23 @@ final class PodExtractorTests: XCTestCase {
 
         XCTAssertEqual(modules.count, 1)
     }
+    
+    func testExtractModulesNotIgnoringTests() throws {
+        let podfile = """
+        PODS:
+          - A (1.0.0)
+          - B (1.0.0)
+          - B/Tests (1.0.0)
+        """
+
+        let modules = try extractModulesFromPodfileLock(podfile, excludeTests: false)
+
+        let libraries = modules.filter({ $0.type == .library })
+        let tests = modules.filter({ $0.type == .test })
+        
+        XCTAssertEqual(libraries.count, 2)
+        XCTAssertEqual(tests.count, 1)
+    }
 
     func testExtractModulesIgnoresExternals() throws {
         let podfile = """
