@@ -26,6 +26,7 @@ public struct Package: Decodable {
             case library
             case test
             case executable
+            case binary
         }
     }
 }

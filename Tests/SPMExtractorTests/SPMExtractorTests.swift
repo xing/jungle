@@ -430,6 +430,18 @@ final class SPMExtractorTests: XCTestCase {
                 "SamplePackage"
               ],
               "type" : "library"
+            },
+            {
+              "c99name" : "BinaryTarget",
+              "module_type" : "BinaryTarget",
+              "name" : "BinaryTarget",
+              "path" : "remote/archive/101116667.zip",
+              "product_memberships" : [
+              ],
+              "sources" : [
+
+              ],
+              "type" : "binary"
             }
           ],
           "tools_version" : "5.7"
