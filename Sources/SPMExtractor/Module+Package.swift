@@ -53,14 +53,14 @@ extension TargetError: CustomStringConvertible {
     }
 }
 
-public func extracPackageModules(from packageRaw: String, target: String, onProduct: String? = nil) throws -> ([Module], [String]) {
+public func extracPackageModules(from packageRaw: String, target: String, isRootTarget: Bool = true) throws -> ([Module], [String]) {
     
     guard
         let data = packageRaw.data(using: .utf8)
     else {
         throw PackageError.nonDecodable(raw: packageRaw)
     }
-    
+
     let package = try JSONDecoder().decode(Package.self, from: data)
     
     if let targetModules = package.targets.filter({ $0.name == target }).first {
@@ -68,8 +68,8 @@ public func extracPackageModules(from packageRaw: String, target: String, onProd
         let external = targetModules.productDependencies?.compactMap { Module(name: $0, dependencies: []) } ?? []
         let targetDependencies = targetModules.dependencies
         return (dependencies + external, targetDependencies)
-    } else if let product = package.products.filter({ $0.name == target }).first, onProduct == nil {
-        let result = try product.targets.compactMap { try extracPackageModules(from: packageRaw, target: $0, onProduct: product.name)}
+    } else if let product = package.products.filter({ $0.name == target }).first, isRootTarget == true {
+        let result = try product.targets.compactMap { try extracPackageModules(from: packageRaw, target: $0, isRootTarget: false)}
         let modules = Set(result.flatMap(\.0))
         return (Array(modules), product.targets)
     } else {
