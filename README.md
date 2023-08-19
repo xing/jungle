@@ -59,7 +59,7 @@ ARGUMENTS:
 OPTIONS:
   --since <since>         Equivalent to git-log --since: Eg: '6 months ago' (default: 6 months ago)
   --module <module>       The Module to compare. If you specify something, target parameter will be ommited
-  --target <target>       The target in your Podfile file to be used
+  --target <target>       The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)
   --output-format <output-format>
                           csv or json (default: csv)
   --version               Show the version.
@@ -90,7 +90,7 @@ ARGUMENTS:
 OPTIONS:
   --to <git-object>       The git objects to compare the current graph to. Eg: - 'main', 'my_branch', 'some_commit_hash'. (default: HEAD, main, master)
   --module <module>       The Module to compare. If you specify something, target parameter will be ommited
-  --target <target>       The target in your Podfile or Package.swift file to be used
+  --target <target>       The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)
   --version               Show the version.
   -h, --help              Show help information.
 ```
@@ -127,7 +127,7 @@ ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
 
 OPTIONS:
-  --target <target>       The target in your Podfile or Package.swift file to be used
+  --target <target>       The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)
   --version               Show the version.
   -h, --help              Show help information.
 
@@ -157,7 +157,7 @@ ARGUMENTS:
   <directory-path>        Path to the directory where Podfile.lock or Package.swift is located (default: .)
 
 OPTIONS:
-  --target <target>       The target in your Podfile or Package.swift file to be used
+  --target <target>       The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)
   --show-only-tests       Show only Test targets
   --version               Show the version.
   -h, --help              Show help information.
@@ -185,7 +185,7 @@ ARGUMENTS:
 OPTIONS:
   --of <git-object>       A git object representing the version to draw the graph for. Eg: - 'main', 'my_branch', 'some_commit_hash'.
   --module <module>       The Module to compare. If you specify something, target parameter will be ommited
-  --target <target>       The target in your Podfile or Package.swift file to be used
+  --target <target>       The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)
   --use-multiedge         Use multi-edge or unique-edge configuration
   --show-externals        Show Externals modules dependencies
   --version               Show the version.

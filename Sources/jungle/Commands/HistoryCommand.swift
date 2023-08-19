@@ -24,7 +24,7 @@ struct HistoryCommand: AsyncParsableCommand {
     @Option(help: "The Module to compare. If you specify something, target parameter will be ommited")
     var module: String?
 
-    @Option(help: "The target in your Podfile file to be used")
+    @Option(help: "The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)")
     var target: String
     
     @Flag(help: "Use multi-edge or unique-edge configuration")
