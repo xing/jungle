@@ -4,7 +4,12 @@ import Shell
 
 public struct Package: Decodable {
     public let targets: [Target]
+    public let products: [Product]
     
+    public struct Product: Decodable {
+        let name: String
+        let targets: [String]
+    }
     public struct Target: Decodable {
         let name: String
         let targetDependencies: [String]?
@@ -48,25 +53,28 @@ extension TargetError: CustomStringConvertible {
     }
 }
 
-public func extracPackageModules(from packageRaw: String, target: String) throws -> ([Module], [String]) {
+public func extracPackageModules(from packageRaw: String, target: String, onProduct: String? = nil) throws -> ([Module], [String]) {
     
     guard
         let data = packageRaw.data(using: .utf8)
     else {
         throw PackageError.nonDecodable(raw: packageRaw)
     }
-
+    
     let package = try JSONDecoder().decode(Package.self, from: data)
     
-    guard let targetModules = package.targets.filter({ $0.name == target }).first else {
+    if let targetModules = package.targets.filter({ $0.name == target }).first {
+        let dependencies = extractDependencies(from: package, on: target)
+        let external = targetModules.productDependencies?.compactMap { Module(name: $0, dependencies: []) } ?? []
+        let targetDependencies = targetModules.dependencies
+        return (dependencies + external, targetDependencies)
+    } else if let product = package.products.filter({ $0.name == target }).first, onProduct == nil {
+        let result = try product.targets.compactMap { try extracPackageModules(from: packageRaw, target: $0, onProduct: product.name)}
+        let modules = Set(result.flatMap(\.0))
+        return (Array(modules), product.targets)
+    } else {
         throw TargetError.targetNotFound(target: target)
     }
-
-    let dependencies = extractDependencies(from: package, on: target)
-    let external = targetModules.productDependencies?.compactMap { Module(name: $0, dependencies: []) } ?? []
-
-    let targetDependencies = targetModules.dependencies
-    return (dependencies + external, targetDependencies)
 }
 
 public func extractDependantTargets(from packageRaw: String, target: String) throws -> [Module] {
