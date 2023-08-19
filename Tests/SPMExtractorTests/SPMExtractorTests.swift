@@ -452,4 +452,94 @@ final class SPMExtractorTests: XCTestCase {
         let dependant = try extractDependantTargets(from: rawPackage, target: "SamplePackage")
         XCTAssertEqual(dependant.map(\.name).sorted(), ["Library", "LibraryTests", "SamplePackageTests"])
     }
+    
+    func testProductModulesFromPackage() throws {
+        let rawPackage = """
+        {
+          "dependencies" : [
+            {
+              "identity" : "swift-algorithms",
+              "requirement" : {
+                "range" : [
+                  {
+                    "lower_bound" : "1.0.0",
+                    "upper_bound" : "2.0.0"
+                  }
+                ]
+              },
+              "type" : "sourceControl",
+              "url" : "https://github.com/apple/swift-algorithms"
+            }
+          ],
+          "manifest_display_name" : "MyPackage",
+          "name" : "MyPackage",
+          "path" : "/Users/oswaldo.rubio/Desktop/MyPackage",
+          "platforms" : [
+
+          ],
+          "products" : [
+            {
+              "name" : "MyPackage",
+              "targets" : [
+                "MyPackage"
+              ],
+              "type" : {
+                "library" : [
+                  "automatic"
+                ]
+              }
+            },
+            {
+              "name" : "FeaturesContainer",
+              "targets" : [
+                "MyPackage"
+              ],
+              "type" : {
+                "library" : [
+                  "automatic"
+                ]
+              }
+            }
+          ],
+          "targets" : [
+            {
+              "c99name" : "MyPackageTests",
+              "module_type" : "SwiftTarget",
+              "name" : "MyPackageTests",
+              "path" : "Tests/MyPackageTests",
+              "sources" : [
+                "MyPackageTests.swift"
+              ],
+              "target_dependencies" : [
+                "MyPackage"
+              ],
+              "type" : "test"
+            },
+            {
+              "c99name" : "MyPackage",
+              "module_type" : "SwiftTarget",
+              "name" : "MyPackage",
+              "path" : "Sources/MyPackage",
+              "product_dependencies" : [
+                "Algorithms"
+              ],
+              "product_memberships" : [
+                "MyPackage",
+                "FeaturesContainer"
+              ],
+              "sources" : [
+                "MyPackage.swift"
+              ],
+              "type" : "library"
+            }
+          ],
+          "tools_version" : "5.8"
+        }
+        """
+        
+        let (dependencies, targetDependencies) = try extracPackageModules(from: rawPackage, target: "FeaturesContainer")
+        
+        XCTAssertEqual(dependencies.map(\.name).sorted(), ["Algorithms", "MyPackage"])
+        XCTAssertEqual(targetDependencies.sorted(), ["MyPackage"])
+    }
 }

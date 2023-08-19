@@ -84,10 +84,10 @@ struct HistoryCommand: AsyncParsableCommand {
     }
     
     public func process(entry: GitLogEntry, target: String, directoryURL: URL) async throws -> HistoryStatsOutput? {
-        guard let package = try? shell("git show \(entry.revision):Package.swift", at: directoryURL), !package.isEmpty  else {
+        guard let package = try? shell("git show \(entry.revision):./Package.swift", at: directoryURL), !package.isEmpty  else {
             return nil
         }
-        try shell("git show \(entry.revision):Package.swift > Package.swift.new", at: directoryURL)
+        try shell("git show \(entry.revision):./Package.swift > Package.swift.new", at: directoryURL)
         try shell("mv Package.swift Package.swift.current", at: directoryURL)
         try shell("mv Package.swift.new Package.swift", at: directoryURL)
         guard
@@ -132,7 +132,7 @@ struct HistoryCommand: AsyncParsableCommand {
                 group.addTask {
                     
                     guard
-                        let podfile = try? shell("git show \(entry.revision):Podfile", at: directoryURL),
+                        let podfile = try? shell("git show \(entry.revision):./Podfile", at: directoryURL),
                         let entryTargetDependencies = try? moduleFromPodfile(podfile, on: target) ?? .init(name: target, dependencies: [])
                     else {
                         return nil
@@ -140,7 +140,7 @@ struct HistoryCommand: AsyncParsableCommand {
 
                     return try? await entry.process(
                         pod: module,
-                        podfile: shell("git show \(entry.revision):Podfile.lock", at: directoryURL),
+                        podfile: shell("git show \(entry.revision):./Podfile.lock", at: directoryURL),
                         target: entryTargetDependencies,
                         usingMultiEdge: useMultiedge
                     )
