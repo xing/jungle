@@ -11,7 +11,7 @@ struct DependantCommand: ParsableCommand {
         abstract: "Outputs a sorted list of targets that depends on the specified one in target"
     )
 
-    @Option(help: "The target in your Podfile or Package.swift file to be used")
+    @Option(help: "The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)")
     var target: String
     
     @Flag(help: "Show only Test targets")

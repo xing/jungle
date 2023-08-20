@@ -13,7 +13,7 @@ struct ModulesCommand: ParsableCommand {
         abstract: "Outputs a sorted list of modules dependencies count of your project"
     )
 
-    @Option(help: "The target in your Podfile or Package.swift file to be used")
+    @Option(help: "The target in your Podfile or Package.swift file to be used (this can be a Product name in SPM)")
     var target: String
 
     @Argument(help: "Path to the directory where Podfile.lock or Package.swift is located")
