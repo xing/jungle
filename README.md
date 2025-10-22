@@ -36,6 +36,26 @@ mint install xing/jungle
 mint run jungle help
 ```
 
+### Makefile (Recommended)
+
+```bash
+git clone https://github.com/xing/jungle
+cd jungle
+make install
+```
+
+This will build and install jungle to `/usr/local/bin`. You can customize the installation path:
+
+```bash
+make install PREFIX=~/.local
+```
+
+Other available commands:
+- `make build` - Build the executable
+- `make clean` - Clean build artifacts
+- `make uninstall` - Remove the installed executable
+- `make help` - Show all available commands
+
 ### Manual
 
 ```bash
