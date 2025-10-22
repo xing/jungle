@@ -1,4 +1,4 @@
-import ArgumentParser
+@preconcurrency import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
@@ -7,7 +7,7 @@ import Shell
 import SPMExtractor
 
 struct GraphCommand: ParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         commandName: "graph",
         abstract: "Outputs the dependency graph in DOT format"
     )

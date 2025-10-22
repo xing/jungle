@@ -1,4 +1,4 @@
-import ArgumentParser
+@preconcurrency import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
@@ -7,13 +7,13 @@ import DependencyModule
 import Shell
 
 struct HistoryCommand: AsyncParsableCommand {
-    
+
     enum OutputFormat: String, ExpressibleByArgument {
         case json
         case csv
     }
-    
-    static var configuration = CommandConfiguration(
+
+    static let configuration = CommandConfiguration(
         commandName: "history",
         abstract: "Displays historic complexity of the dependency graph"
     )

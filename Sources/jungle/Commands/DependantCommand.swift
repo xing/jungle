@@ -1,12 +1,12 @@
 import Foundation
-import ArgumentParser
+@preconcurrency import ArgumentParser
 import Shell
 import SPMExtractor
 import DependencyModule
 import PodExtractor
 
 struct DependantCommand: ParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         commandName: "dependant",
         abstract: "Outputs a sorted list of targets that depends on the specified one in target"
     )

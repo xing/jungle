@@ -1,4 +1,4 @@
-import ArgumentParser
+@preconcurrency import ArgumentParser
 import Foundation
 import DependencyGraph
 import PodExtractor
@@ -20,7 +20,7 @@ extension CompareError: CustomStringConvertible {
 }
 
 struct CompareCommand: ParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         commandName: "compare",
         abstract: "Compares the current complexity of the dependency graph to others versions in git"
     )

@@ -1,5 +1,5 @@
 import Foundation
-import ArgumentParser
+@preconcurrency import ArgumentParser
 import Shell
 import PodExtractor
 import DependencyGraph
@@ -8,7 +8,7 @@ import DependencyModule
 
 struct ModulesCommand: ParsableCommand {
 
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         commandName: "modules",
         abstract: "Outputs a sorted list of modules dependencies count of your project"
     )
