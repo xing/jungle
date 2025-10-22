@@ -2,8 +2,8 @@ import XCTest
 @testable import SPMSample
 
 final class SPMSampleTests: XCTestCase {
-    func testExample() throws {
+    func testSample() async throws {
         let sample = SPMSample()
-        sample.example()
+        await sample.run()
     }
 }
