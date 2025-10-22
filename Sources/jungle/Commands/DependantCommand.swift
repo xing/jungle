@@ -39,7 +39,8 @@ struct DependantCommand: ParsableCommand {
     }
     
     private func processPodfile(at directoryURL: URL) throws {
-        let podfileLock = try shell("git show HEAD:Podfile.lock", at: directoryURL)
+        let podfileLockURL = directoryURL.appendingPathComponent("Podfile.lock")
+        let podfileLock = try String(contentsOf: podfileLockURL, encoding: .utf8)
         let allPodfileModules = try extractModulesFromPodfileLock(podfileLock, excludeTests: false)
         let targets = try extractDependantTargets(from: allPodfileModules, for: target)
         processOutput(for: targets)
