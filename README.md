@@ -38,17 +38,23 @@ mint run jungle help
 
 ### Makefile (Recommended)
 
+**System-wide installation** (installs to `/usr/local/bin`, may require password):
+
 ```bash
 git clone https://github.com/xing/jungle
 cd jungle
 make install
 ```
 
-This will build and install jungle to `/usr/local/bin`. You can customize the installation path:
+**User installation** (no sudo required):
 
 ```bash
+git clone https://github.com/xing/jungle
+cd jungle
 make install PREFIX=~/.local
 ```
+
+Make sure `~/.local/bin` is in your `PATH`.
 
 Other available commands:
 - `make build` - Build the executable
