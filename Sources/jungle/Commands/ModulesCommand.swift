@@ -41,13 +41,14 @@ struct ModulesCommand: ParsableCommand {
     private func processPodfile(at directoryURL: URL) throws {
         // Choose the target to analyze
         let podfileJSON = try shell("pod ipc podfile-json Podfile --silent", at: directoryURL)
-        
+
         guard let currentTargetDependencies = try moduleFromJSONPodfile(podfileJSON, onTarget: target) else {
             throw CompareError.targetNotFound(target: target)
         }
         let targetDependencies = currentTargetDependencies.dependencies
-        
-        let podfileLock = try shell("git show HEAD:Podfile.lock", at: directoryURL)
+
+        let podfileLockURL = directoryURL.appendingPathComponent("Podfile.lock")
+        let podfileLock = try String(contentsOf: podfileLockURL, encoding: .utf8)
         let allPodfileModules = try extractModulesFromPodfileLock(podfileLock)
         let realTargetDependencies = allPodfileModules.filter { targetDependencies.contains($0.name) }
 
