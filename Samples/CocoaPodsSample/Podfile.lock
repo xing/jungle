@@ -1,0 +1,49 @@
+PODS:
+  - Alamofire (5.10.2)
+  - Kingfisher (7.12.0)
+  - Moya (15.0.0):
+    - Moya/Core (= 15.0.0)
+  - Moya/Core (15.0.0):
+    - Alamofire (~> 5.0)
+  - RxCocoa (6.9.0):
+    - RxRelay (= 6.9.0)
+    - RxSwift (= 6.9.0)
+  - RxRelay (6.9.0):
+    - RxSwift (= 6.9.0)
+  - RxSwift (6.9.0)
+  - SnapKit (5.7.1)
+  - SwiftyJSON (5.0.2)
+
+DEPENDENCIES:
+  - Alamofire (~> 5.8)
+  - Kingfisher (~> 7.10)
+  - Moya (~> 15.0)
+  - RxCocoa (~> 6.6)
+  - RxSwift (~> 6.6)
+  - SnapKit (~> 5.6)
+  - SwiftyJSON (~> 5.0)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - Kingfisher
+    - Moya
+    - RxCocoa
+    - RxRelay
+    - RxSwift
+    - SnapKit
+    - SwiftyJSON
+
+SPEC CHECKSUMS:
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
+  Kingfisher: 53a10ea35051a436b5fb626ca2dd8f3144d755e9
+  Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
+  RxCocoa: ac16414696ae706516be3e1ab00fcce5bdc9be8a
+  RxRelay: 6b0c930e5cef57d5fe2032571e5e65b78e3cbdb1
+  RxSwift: 31649ace6aceeb422e16ff71c60804f9c3281ed9
+  SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
+  SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
+
+PODFILE CHECKSUM: 138a12e14797ce3c5cc5a496d9d472ec428bfc16
+
+COCOAPODS: 1.16.2
