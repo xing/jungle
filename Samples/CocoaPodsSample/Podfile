@@ -1,0 +1,21 @@
+platform :ios, '13.0'
+use_frameworks!
+
+target 'CocoaPodsSample' do
+  # Networking
+  pod 'Alamofire', '~> 5.8'
+  pod 'Moya', '~> 15.0'
+
+  # JSON Parsing
+  pod 'SwiftyJSON', '~> 5.0'
+
+  # Image Loading
+  pod 'Kingfisher', '~> 7.10'
+
+  # Reactive Programming
+  pod 'RxSwift', '~> 6.6'
+  pod 'RxCocoa', '~> 6.6'
+
+  # UI
+  pod 'SnapKit', '~> 5.6'
+end

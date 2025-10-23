@@ -1,8 +1,8 @@
-import ArgumentParser
+@preconcurrency import ArgumentParser
 
 @main
 struct Jungle: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         commandName: "jungle",
         abstract: "SwiftPM and Cocoapods based projects complexity analyzer.",
         version: "2.3.2",

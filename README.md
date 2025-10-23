@@ -17,6 +17,7 @@ You can read more information about dependency complexity in our Technical artic
 - [Installation](#installation)
   * [Mint](#mint)
   * [Manual](#manual)
+- [Sample Projects](#sample-projects)
 - [Usage](#usage)
   * [Fetch Historic Complexities](#fetch-historic-complexities)
   * [Compare Complexity Graphs](#compare-complexity-graphs)
@@ -35,6 +36,27 @@ mint install xing/jungle
 mint run jungle help
 ```
 
+### Makefile (Recommended)
+
+```bash
+git clone https://github.com/xing/jungle
+cd jungle
+make install
+```
+
+This will install jungle to `~/.local/bin`. Make sure this directory is in your `PATH`:
+
+```bash
+# Add to your ~/.zshrc or ~/.bashrc
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Other available commands:
+- `make build` - Build the executable
+- `make clean` - Clean build artifacts
+- `make uninstall` - Remove the installed executable
+- `make help` - Show all available commands
+
 ### Manual
 
 ```bash
@@ -43,6 +65,31 @@ cd jungle
 swift build -c release
 .build/release/jungle help
 ```
+
+## Sample Projects
+
+The `Samples/` directory contains example projects to help you get started with Jungle:
+
+### SPMSample
+A Swift Package Manager project with popular dependencies (Alamofire, RealmSwift, SwiftyJSON, Kingfisher).
+
+**Try it:**
+```bash
+cd Samples/SPMSample
+jungle modules --target SPMSample
+```
+
+### CocoaPodsSample
+An iOS project using CocoaPods with dependencies like Moya, RxSwift, and SnapKit.
+
+**Setup and try:**
+```bash
+cd Samples/CocoaPodsSample
+pod install
+jungle modules --target CocoaPodsSample
+```
+
+See [Samples/README.md](Samples/README.md) for more details about each sample project.
 
 ## Usage
 

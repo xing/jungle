@@ -1,0 +1,13 @@
+name: CocoaPodsSample
+options:
+  bundleIdPrefix: com.sample
+targets:
+  CocoaPodsSample:
+    type: application
+    platform: iOS
+    deploymentTarget: "13.0"
+    sources:
+      - CocoaPodsSample
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.sample.CocoaPodsSample
+      SWIFT_VERSION: "5.0"
